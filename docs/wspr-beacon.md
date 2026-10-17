@@ -1,55 +1,68 @@
-# WSPR beacon in the Pebble HF firmware (plan)
+# WSPR beacon (`WSPR_BEACON`)
 
-Status: plan agreed 17 Oct 2026, not yet written. Code is developed on the `wspr-beacon` branch and merged into `main` once tested on the air.
+Status (17 Oct 2026): **written and host-tested, not yet tried on a radio.** Developed on the `wspr-beacon` branch; merged into `main` once it has worked on the air.
 
-This is a firmware-only feature: the radio becomes a stand-alone WSPR beacon with no Pico, phone or computer attached.
+A stand-alone WSPR beacon inside the Pebble HF firmware: no Pico, phone or computer attached. It sends a standard WSPR message (callsign, 4-character grid, power) on one fixed frequency in the 20 m WSPR window.
 
-## What it does
+## Building
 
-1. Transmits a standard WSPR message (callsign, 4-character grid, power) on one fixed 20 m frequency inside the WSPR window, 14.0970–14.0972 MHz (USB dial 14.0956 MHz + 1400–1600 Hz). Default: 14.097100 MHz.
-2. Time sync by hand: choose start in the menu, then click Select at the moment the phone's clock rolls over to an even minute.
-3. Each transmission starts 1 s after an even minute and lasts 110.6 s (162 symbols of 0.6827 s, 4-FSK, 1.4648 Hz spacing).
-4. Repeats on the interval chosen in the menu.
-5. Any button press stops it and returns to receive.
+Enable the switch near the top of `usdx.ino`:
 
-## Menu entries
+```c
+#define WSPR_BEACON    1   // Stand-alone WSPR beacon ...
+```
 
-| Entry | Values | Notes |
+Nothing else changes; DIAG stays on, CAT stays off. With the switch off the build is byte-for-byte the official firmware (checked: identical hex).
+
+| Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
+|---|---|---|---|
+| Official | 26,894 | 1,022 | 1,026 |
+| `WSPR_BEACON` | 29,960 (92%) | 1,196 | 852 |
+
+Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
+
+## Using it
+
+Menu entries (section 5):
+
+| Menu | Values | Notes |
 |---|---|---|
-| WSPR Call | text | uses the firmware's existing string editor (`MENU_STR`) |
-| WSPR Grid | 4 characters | e.g. EN34 |
-| WSPR Power | 37 / 33 / 30 / 27 dBm | 5 / 2 / 1 / 0.5 W. The radio cannot measure its output, so the operator picks the value (normal WSPR practice). About 5 W on 13.8 V, about 1 W on USB-C |
-| WSPR Every | 2 / 4 / 6 / 10 / 20 min | default 10; longer intervals keep the PA cooler |
-| WSPR Start | — | arms the beacon, then waits for the Select click on the even minute |
+| 5.1 WSPR Call | text, up to 6 characters | standard calls only (digit as 2nd or 3rd character, e.g. N0ASL, K1ABC, G4ABC); no /P or prefixes |
+| 5.2 WSPR Grid | 4 characters | e.g. EN34 |
+| 5.3 WSPR Power | 20 / 23 / 27 / 30 / 33 / 37 dBm | the value sent in the message; the radio cannot measure its output. About 5 W (37) on 13.8 V, about 1 W (30) on USB-C |
+| 5.4 WSPR Every | 2 / 4 / 6 / 10 / 20 min | time between transmission starts; default 10 |
+| 5.5 WSPR Beacon | OFF / ON | not stored; always OFF at power-up |
 
-## Build
+Text entry uses the firmware's string editor: turn the knob to change a character, click the knob to move to the next character, left button to save.
 
-- New build switch `WSPR_BEACON` in `usdx.ino`, off by default so the stock behaviour is unchanged.
-- `CAT` stays off (as in the official firmware); CAT (≈4.1 KB) and the beacon (≈2–2.4 KB) would not fit together with DIAG.
-- DIAG stays on. Nothing else is turned on.
+1. Set call, grid, power and interval once (they are saved).
+2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `R at even minute` (or `WSPR: bad call` / `WSPR: bad grid`).
+3. Watch the phone's clock and **click the right button the moment an even minute starts** (e.g. 14:32:00). The moment the button goes down is used, not the end of the click.
+4. The first transmission starts 1 s later and lasts 110.6 s (top line `WSPR TX` and symbols left). Between transmissions the top line counts down (`WSPR next 8:21`); the radio receives normally, and the knob still tunes.
+5. **Any button press stops the beacon** (also during a transmission, as does the key/PTT). Switch it on again from the menu and re-sync.
 
-## Budget (estimates until written)
+Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's crystal drifts a few seconds a day.
 
-| Part | Flash |
-|---|---|
-| WSPR encoder (message packing, convolutional code, interleave, sync vector) | 1.0–1.5 KB |
-| Beacon timing, keying, display | 0.3–0.5 KB |
-| Menu entries | 0.1–0.2 KB |
-| String editor (`MENU_STR`, now only built with `CW_MESSAGE`) | 0.3–0.4 KB |
-| **Total** | **≈2.0–2.4 KB of 5.36 KB free** (stock 1.0.7 = 26,894 of 32,256 bytes) |
+## How it works
 
-RAM: the 162 symbols pack into 41 bytes; a few bytes of timing state.
+- Frequency: tone 0 at 14 097 098 Hz; the four tones span 14 097 098–14 097 102.4 Hz, centred in the 14.0970–14.0972 MHz WSPR window (`WSPR_FREQ`).
+- Transmit uses the CW path (constant carrier, key-click shaping). The tones are made by moving the Si5351 PLL in steps of 1/256 Hz (`freq_calc_fine()`, same registers the SSB transmitter uses); the PLL's real resolution is about 0.1 Hz. Computed from the register arithmetic, the tones are within 0.05 Hz of the exact 1.4648 Hz spacing, for every CW Tone setting.
+- Timing: `millis()` runs 1.25× fast on the 20 MHz crystal (the core is built for 16 MHz); all times are converted with `WSPR_U()`. Symbols are 8192/12000 s, timed from the key-down moment.
+- The message is encoded when the beacon is switched on (41 bytes: 21 bytes of data bits in RAM, the sync vector in flash).
+- Practice mode (menu 2.8) is honoured: the beacon runs and times everything but sends no RF. Good for the first try.
 
-## Technical notes
+## Things to watch on the first runs
 
-- Tones: the firmware's fast Si5351 update (`freq_calc_fast(int16_t df)`) works in whole hertz. Try a finer-step version first (the PLL maths already scales by 128); if that is not clean, fall back to dithering between 1 Hz steps, which the KH1 simulation showed decodes as well as exact tones (down to −29 dB, 4 steps per symbol).
-- Frequency stability: 26 MHz TCXO on the Si5351, so drift over 110 s should be negligible.
-- Timing: WSPR decoders accept about ±2 s; within 1 s costs nothing. A button press against the phone's clock is good to ~0.2–0.3 s. The AVR's 20 MHz crystal drifts ~2–4 s/day, so sync at the start of each session (re-sync after ~6–12 h).
-- PA heat: 110 s key-down is much longer than FT8 (13 s). Check the BS170 temperature on the first runs, starting at reduced drive or supply voltage. Class E efficiency must be healthy (≥75 %, see the Pebble HF troubleshooting guide).
-- Transmit uses constant amplitude (like CW), not the SSB envelope path.
+- **PA heat:** 110 s key-down is much longer than CW or FT8. Start with a dummy load, low supply voltage (or USB-C) and the 10-minute interval; feel the BS170s after each transmission. Healthy Class E efficiency matters (see `TROUBLESHOOTING.md`).
+- **Sidetone:** the CW sidetone sounds for the whole transmission. Set 2.3 CW Side Vol to −1 to mute it.
+- **Frequency:** check the tones land where expected with another receiver running WSJT-X (dial 14.0956 USB, signal at ~1500 Hz audio). An offset of tens of Hz means the Si5351 reference (8.3 Ref freq) needs calibrating; it is still inside the 200 Hz window.
 
-## Testing plan
+## Tests (run on a PC)
 
-1. Encoder: compare the 162 symbols with WSJT-X's reference encoder for several messages (on the PC, before flashing).
-2. Bench: Practice mode / dummy load; check timing against the phone and the tone steps on a receiver running WSJT-X.
-3. Air: low power, then check wsprnet.org / wspr.live for spots.
+- `python3 test/wspr_encoder_test.py` — compiles the encoder block from `usdx.ino` and compares its 162 symbols with a reference encoder (the KH1 project's, verified against WSJT-X) on 2,000 messages, plus 10 invalid inputs that must be rejected. Also matches the published start of the `K1ABC FN42 37` test vector.
+- `python3 test/wspr_beacon_sim.py` — runs the beacon code against a simulated clock: start 1.000 s after the sync press, 110.592 s on air, 10-minute interval, every tone value and time, stop on a button press, refusal of a bad callsign.
+
+## Not done (possible later)
+
+- WWV time sync (experimental idea: receive 10 MHz, find the minute tone and the even/odd bit).
+- Frequency offset within the window, compound callsigns (type 2/3 messages), other bands.

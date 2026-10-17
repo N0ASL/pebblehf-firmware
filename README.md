@@ -3,7 +3,7 @@
 >
 > | Addition | Switch | Status |
 > |---|---|---|
-> | Stand-alone WSPR beacon (call/grid/power/interval menus, manual sync on the even minute) | `WSPR_BEACON` | planned, see [`docs/wspr-beacon.md`](docs/wspr-beacon.md) |
+> | Stand-alone WSPR beacon (call/grid/power/interval menus, manual sync on the even minute) | `WSPR_BEACON` | written and host-tested, not yet on the air; see [`docs/wspr-beacon.md`](docs/wspr-beacon.md) |
 >
 > Fork notes: [`docs/firmware.md`](docs/firmware.md) (building, flash/RAM sizes, built-in optional switches), [`docs/hardware-notes.md`](docs/hardware-notes.md) (V2.5 board notes, CAT over the LCD lines; Pico interface parked).
 > Update from upstream: `git fetch upstream && git merge upstream/main`.

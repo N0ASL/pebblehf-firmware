@@ -53,6 +53,7 @@
 //#define CW_FREQS_FISTS 1   // Defaults to CW FISTS frequencies when changing bands
 //#define CW_MESSAGE       1   // Transmits pre-defined CW messages on-demand (left-click menu item 4.2)
 //#define CW_MESSAGE_EXT 1   // Additional CW messages
+//#define WSPR_BEACON    1   // Stand-alone WSPR beacon (menu 5.1-5.5): callsign, grid, power, interval; sync by pressing the right button on an even minute
 //#define TX_DELAY       1   // Enables a delay in the actual transmission to allow relay-switching to be completed before the power is applied (see also NTX, PTX definitions below for GPIO that can switch relay/PA)
 //#define NTX            11  // Enables LOW  on TX, used as PTT out to enable external PAs (a value of 11 means PB3 is used)
 //#define PTX            11  // Enables HIGH on TX, used as PTT out to enable external PAs (a value of 11 means PB3 is used)
@@ -1392,6 +1393,19 @@ public:
     pll_regs[7] = BB0(msp2);
   }
 
+#ifdef WSPR_BEACON
+  void freq_calc_fine(int32_t df256)  // like freq_calc_fast(), but df in 1/256 Hz (resolution of the PLL itself is about 0.1 Hz at 14 MHz)
+  {
+    uint32_t msb128 = _msb128 + ((int64_t)_div * df256 * (_MSC * 128 / 256)) / fxtal;
+    uint16_t msp1 = _msa128min512 + msb128 / _MSC;
+    uint16_t msp2 = msb128;
+    pll_regs[4] = BB0(msp1);
+    pll_regs[5] = ((_MSC&0xF0000)>>(16-4));
+    pll_regs[6] = BB1(msp2);
+    pll_regs[7] = BB0(msp2);
+  }
+#endif //WSPR_BEACON
+
   inline void SendPLLRegisterBulk(){
     i2c.start();
     i2c.SendByte(SI5351_ADDR << 1);
@@ -2327,6 +2341,13 @@ int cw_tx(char* msg){
   return 0;
 }
 #endif // CW_MESSAGE
+
+#if defined(WSPR_BEACON) && !defined(MENU_STR)
+#define MENU_STR  1  // string editor, used for the WSPR callsign and grid
+#endif
+#if defined(WSPR_BEACON) && !defined(TX_ENABLE)
+#error "WSPR_BEACON needs TX_ENABLE"
+#endif
 
 volatile uint8_t menumode = 0;  // 0=not in menu, 1=selects menu item, 2=selects parameter value
 
@@ -4010,6 +4031,160 @@ void switch_rxtx(uint8_t tx_enable){
 
 uint8_t rx_ph_q = 90;
 
+#ifdef WSPR_BEACON
+// --- WSPR_ENCODER_BEGIN (host-tested: test/wspr_encoder_test.py extracts this block) ---
+// Standard (type 1) WSPR message: callsign up to 6 characters, 4-character grid, power in dBm.
+// Result: 162 data bits (after convolutional code and interleaving) in wspr_data[]; channel symbol k is
+// 2 * data bit k + sync bit k, with the sync vector in wspr_syncv[].
+const uint8_t wspr_syncv[21] PROGMEM = {  // bit k of the WSPR sync vector is bit (k & 7) of byte k >> 3
+  0x03, 0x71, 0xA4, 0x07, 0xA4, 0x40, 0xB3, 0x58, 0x58, 0x95, 0x34,
+  0x56, 0x04, 0xC9, 0xCD, 0xE2, 0xA0, 0x0C, 0x58, 0x63, 0x00 };
+uint8_t wspr_data[21];
+
+static uint8_t wspr_chr(char c){  // '0'-'9' -> 0-9, 'A'-'Z' -> 10-35, ' ' -> 36, else 255
+  if(c >= '0' && c <= '9') return c - '0';
+  if(c >= 'A' && c <= 'Z') return c - 'A' + 10;
+  if(c == ' ' || c == 0) return 36;
+  return 255;
+}
+
+static uint8_t wspr_parity(uint32_t x){
+  x ^= x >> 16; x ^= x >> 8; x ^= x >> 4; x ^= x >> 2; x ^= x >> 1;
+  return x & 1;
+}
+
+// Returns 0 when encoded, 1 for a callsign that does not fit a standard WSPR message, 2 for a bad grid.
+uint8_t wspr_encode(const char* call, const char* grid, uint8_t dbm){
+  char c6[6];
+  uint8_t len = 0;
+  for(; len < 7 && call[len] && call[len] != ' '; len++);
+  if(len < 3 || len > 6) return 1;
+  uint8_t sh = (wspr_chr(call[2]) <= 9) ? 0 : (wspr_chr(call[1]) <= 9) ? 1 : 2;  // digit must end up at position 2
+  if(sh == 2 || len + sh > 6) return 1;
+  for(uint8_t i = 0; i != 6; i++) c6[i] = (i < sh || i >= len + sh) ? ' ' : call[i - sh];
+  uint32_t n = 0;
+  for(uint8_t i = 0; i != 6; i++){
+    uint8_t v = wspr_chr(c6[i]);
+    if(v == 255) return 1;
+    if(i == 2){ if(v > 9) return 1; n = n * 10 + v; }
+    else if(i < 2){ n = n * 36 + v; }
+    else { if(v < 10) return 1; n = n * 27 + v - 10; }  // letters or space only
+  }
+  uint8_t g0 = grid[0] - 'A', g1 = grid[1] - 'A', g2 = grid[2] - '0', g3 = grid[3] - '0';
+  if(g0 > 17 || g1 > 17 || g2 > 9 || g3 > 9 || (grid[4] && grid[4] != ' ')) return 2;
+  uint32_t m = ((uint32_t)(179 - 10 * g0 - g2) * 180 + 10 * g1 + g3) * 128 + dbm + 64;
+
+  // convolutional code (K=32, r=1/2) over 50 message bits + 31 zero bits, written out through the bit-reversal interleaver
+  memset(wspr_data, 0, sizeof(wspr_data));
+  uint32_t reg = 0;
+  uint8_t c = 0;  // interleaver counter
+  for(uint8_t i = 0; i != 81; i++){
+    uint8_t b = (i < 28) ? (n >> (27 - i)) & 1 : (i < 50) ? (m >> (49 - i)) & 1 : 0;
+    reg = (reg << 1) | b;
+    for(uint8_t p = 0; p != 2; p++){
+      uint8_t bit = wspr_parity(reg & (p ? 0xE4613C47UL : 0xF2D05351UL));
+      uint8_t j;
+      do { j = 0; for(uint8_t k = 0; k != 8; k++) if(c & (1 << k)) j |= 0x80 >> k; c++; } while(j >= 162);
+      if(bit) wspr_data[j >> 3] |= 1 << (j & 7);
+    }
+  }
+  return 0;
+}
+
+inline uint8_t wspr_symbol(uint8_t k){  // channel symbol 0..3
+  return ((wspr_data[k >> 3] >> (k & 7)) & 1) * 2 + ((pgm_read_byte(&wspr_syncv[k >> 3]) >> (k & 7)) & 1);
+}
+// --- WSPR_ENCODER_END ---
+
+// Beacon. Time base: millis() counts F_MCU/16 MHz too fast (core built for 16 MHz, crystal is F_MCU), so real
+// milliseconds are converted with WSPR_U(). All schedule times are millis() values; compare them by signed difference.
+#define WSPR_U(ms)  ((uint32_t)(ms) * (F_MCU / 16000) / 1000)    // real ms -> millis() units (ms <= 3.4e6 for F_MCU 20M)
+#define WSPR_FREQ   14097098UL  // tone 0 in Hz; the four tones span 14 097 098-14 097 102.4 Hz, centred in the 14.0970-14.0972 MHz WSPR window
+#define WSPR_EEPROM 0x3F0       // own EEPROM area (12 bytes), outside the parameter list, so other settings keep their addresses
+
+char wspr_call[7] = "";
+char wspr_grid[5] = "";
+uint8_t wspr_pwr = 5;          // index into wspr_dbm
+uint8_t wspr_every = 3;        // index into wspr_min
+uint8_t wspr_on = 0;           // menu "WSPR Beacon" (not stored)
+uint8_t wspr_state = 0;        // 0 off, 1 waiting for the sync press, 2 running
+uint32_t wspr_press;           // millis() when the last button press started
+uint32_t wspr_next;            // millis() of the next transmission start
+uint16_t wspr_shown;           // last countdown shown
+const uint8_t wspr_dbm[] = { 20, 23, 27, 30, 33, 37 };
+const char* wspr_pwr_label[] = { "20dBm 0.1W", "23dBm 0.2W", "27dBm 0.5W", "30dBm 1W", "33dBm 2W", "37dBm 5W" };
+const uint8_t wspr_min[] = { 2, 4, 6, 10, 20 };
+const char* wspr_every_label[] = { "2 min", "4 min", "6 min", "10 min", "20 min" };
+
+void wspr_status(const __FlashStringHelper* s){
+  lcd.noCursor(); lcd.setCursor(0, 0); lcd.print(s); lcd_blanks(); lcd_blanks();
+}
+
+void wspr_stop(){
+  wspr_on = 0;
+  wspr_state = 0;
+  show_banner();
+  change = true;  // redraw frequency and restore RX settings
+}
+
+void wspr_sync(){  // the press that started at wspr_press marks the start of an even minute
+  wspr_next = wspr_press + WSPR_U(1000);  // first transmission starts 1 s into that minute
+  wspr_shown = 0xffff;
+  wspr_state = 2;
+}
+
+uint8_t wspr_tx(){  // one 110.6 s transmission; returns 1 when stopped by a button or the key
+  uint8_t _mode = mode;
+  uint8_t stop = 0;
+  mode = CW;  // constant carrier; switch_rxtx() then keys at (PLL frequency - cw_offset)
+  wspr_status(F("WSPR TX"));
+  si5351.freq(WSPR_FREQ + cw_offset, rx_ph_q, 0);  // same PLL set-up as CW receive, so that TX lands on WSPR_FREQ
+  uint32_t t0 = millis();
+  switch_rxtx(1);
+  for(uint8_t k = 0; (k != 162) && !stop; k++){
+    si5351.freq_calc_fine(-(int32_t)cw_offset * 256 + wspr_symbol(k) * 375);  // tone spacing 12000/8192 Hz = 375/256 Hz
+    si5351.SendPLLRegisterBulk();
+    if((k & 7) == 0){ lcd.setCursor(8, 0); lcd.print(162 - k); lcd.print(' '); }  // symbols left
+    uint32_t end = t0 + (uint32_t)(k + 1) * 8192 * (F_MCU / 16000) / 12000;    // symbol length 8192/12000 s
+    while((int32_t)(millis() - end) < 0){
+      wdt_reset();
+      if((inv ^ digitalRead(BUTTONS)) || !digitalRead(DIT)){ stop = 1; break; }
+    }
+  }
+  switch_rxtx(0);
+  mode = _mode;
+  change = true;
+  for(; inv ^ digitalRead(BUTTONS);) wdt_reset();  // wait until the button is released
+  return stop;
+}
+
+void wspr_poll(){  // called from loop()
+  if(menumode) return;
+  if(wspr_state == 0){
+    if(!wspr_on) return;
+    uint8_t r = wspr_encode(wspr_call, wspr_grid, wspr_dbm[wspr_pwr]);  // "WSPR Beacon" switched on in the menu
+    if(r){ wspr_on = 0; wspr_status((r == 1) ? F("WSPR: bad call") : F("WSPR: bad grid")); return; }
+    wspr_state = 1;
+    wspr_status(F("R at even minute"));
+    return;
+  }
+  if(wspr_state != 2) return;
+  if((int32_t)(millis() - wspr_next) >= 0){
+    if((int32_t)(millis() - wspr_next) < (int32_t)WSPR_U(1000)){  // on time (not more than 1 s late)
+      if(wspr_tx()){ wspr_stop(); return; }
+    }
+    for(; (int32_t)(millis() - wspr_next) >= 0;) wspr_next += WSPR_U(60000) * wspr_min[wspr_every];  // next slot in the future
+    wspr_shown = 0xffff;
+  }
+  uint16_t s = (wspr_next - millis()) / (F_MCU / 16000) / 1000 + 1;  // seconds until the next transmission
+  if(s != wspr_shown){
+    wspr_shown = s;
+    lcd.noCursor(); lcd.setCursor(0, 0); lcd.print(F("WSPR next ")); lcd.print(s / 60); lcd.print(':'); lcd.print((s % 60) / 10); lcd.print(s % 10); lcd_blanks();
+    stepsize_showcursor();
+  }
+}
+#endif //WSPR_BEACON
+
 #ifdef QCX
 #define CAL_IQ 1
 #ifdef CAL_IQ
@@ -4349,11 +4524,19 @@ const char* agc_label[] = { "OFF", "Fast", "Slow" };
 
 #define _N(a) sizeof(a)/sizeof(a[0])
 
+#ifdef WSPR_BEACON
+#define N_PARAMS 50  // number of (visible) parameters
+#else
 #define N_PARAMS 45  // number of (visible) parameters
+#endif
 
 #define N_ALL_PARAMS (N_PARAMS+5)  // number of parameters
 
-enum params_t {_NULL, VOLUME, MODE, FILTER, BAND, STEP, VFOSEL, RIT, AGC, NR, ATT, ATT2, SMETER, SWRMETER, CWDEC, CWTONE, SIDETONE_VOL, CWOFF, SEMIQSK, KEY_WPM, KEY_MODE, KEY_PIN, KEY_TX, VOX, VOXGAIN, DRIVE, TXDELAY, MOX, CWINTERVAL, CWMSG1, CWMSG2, CWMSG3, CWMSG4, CWMSG5, CWMSG6, PWM_MIN, PWM_MAX, SIFXTAL, IQ_ADJ, CALIB, SR, CPULOAD, PARAM_A, PARAM_B, PARAM_C, SWVER, BACKL, FREQA, FREQB, MODEA, MODEB, VERS, ALL=0xff};
+enum params_t {_NULL, VOLUME, MODE, FILTER, BAND, STEP, VFOSEL, RIT, AGC, NR, ATT, ATT2, SMETER, SWRMETER, CWDEC, CWTONE, SIDETONE_VOL, CWOFF, SEMIQSK, KEY_WPM, KEY_MODE, KEY_PIN, KEY_TX, VOX, VOXGAIN, DRIVE, TXDELAY, MOX, CWINTERVAL, CWMSG1, CWMSG2, CWMSG3, CWMSG4, CWMSG5, CWMSG6,
+#ifdef WSPR_BEACON
+  WSPR_CALL, WSPR_GRID, WSPR_PWR, WSPR_EVERY, WSPR_RUN,
+#endif
+  PWM_MIN, PWM_MAX, SIFXTAL, IQ_ADJ, CALIB, SR, CPULOAD, PARAM_A, PARAM_B, PARAM_C, SWVER, BACKL, FREQA, FREQB, MODEA, MODEB, VERS, ALL=0xff};
 
 int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
 {
@@ -4426,6 +4609,28 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
     case CWMSG6:    paramAction(action, cw_msg[5],   0x47, F("CW Message 6"), sizeof(cw_msg)); break;
 #endif
 #endif
+#ifdef WSPR_BEACON
+    // Stored in their own EEPROM area (WSPR_EEPROM): eeprom_addr is put back afterwards, so enabling WSPR_BEACON does not move other settings.
+    case WSPR_CALL:
+    case WSPR_GRID:
+    case WSPR_PWR:
+    case WSPR_EVERY: {
+      int _addr = eeprom_addr;
+      if(id == WSPR_CALL){  eeprom_addr = WSPR_EEPROM;      paramAction(action, wspr_call, 0x51, F("WSPR Call"), 6); }
+      if(id == WSPR_GRID){  eeprom_addr = WSPR_EEPROM + 6;  paramAction(action, wspr_grid, 0x52, F("WSPR Grid"), 4); }
+      if(id == WSPR_PWR){   eeprom_addr = WSPR_EEPROM + 10; paramAction(action, wspr_pwr, 0x53, F("WSPR Power"), wspr_pwr_label, 0, _N(wspr_dbm) - 1, false); }
+      if(id == WSPR_EVERY){ eeprom_addr = WSPR_EEPROM + 11; paramAction(action, wspr_every, 0x54, F("WSPR Every"), wspr_every_label, 0, _N(wspr_min) - 1, false); }
+      eeprom_addr = _addr;
+      wspr_call[6] = 0; wspr_grid[4] = 0;
+      if(action == LOAD){  // area never written (0xFF) or damaged: fall back to defaults
+        for(uint8_t i = 0; i != 6; i++) if(wspr_call[i] && ((wspr_call[i] < ' ') || (wspr_call[i] > 'Z'))){ memset(wspr_call, 0, sizeof(wspr_call)); break; }
+        for(uint8_t i = 0; i != 4; i++) if(wspr_grid[i] && ((wspr_grid[i] < ' ') || (wspr_grid[i] > 'Z'))){ memset(wspr_grid, 0, sizeof(wspr_grid)); break; }
+        if(wspr_pwr >= _N(wspr_dbm)) wspr_pwr = 5;
+        if(wspr_every >= _N(wspr_min)) wspr_every = 3;
+      }
+      } break;
+    case WSPR_RUN:  if((action == UPDATE) || (action == UPDATE_MENU)) paramAction(action, wspr_on, 0x55, F("WSPR Beacon"), offon_label, 0, 1, false); break;  // not stored
+#endif //WSPR_BEACON
     case PWM_MIN: paramAction(action, pwm_min, 0x81, F("PA Bias min"), NULL, 0, pwm_max - 1, false); break;
     case PWM_MAX: paramAction(action, pwm_max, 0x82, F("PA Bias max"), NULL, pwm_min, 255, false); break;
     case SIFXTAL: paramAction(action, si5351.fxtal, 0x83, F("Ref freq"), NULL, 14000000, 28000000, false); break;
@@ -5303,7 +5508,11 @@ void loop()
   if((mode == CW) && cwdec && ((!tx) && (!semi_qsk_timeout))) cw_decode();  // CW decoder only active during RX
 #endif  //CW_DECODER
 
+#ifdef WSPR_BEACON
+  if((menumode == 0) && (!wspr_state)){ // in main (top line is used by the beacon while it runs)
+#else
   if(menumode == 0){ // in main
+#endif
 #ifdef CW_DECODER
     if(cw_event){
       uint8_t offset = (uint8_t[]){ 0, 7, 3, 5, 3, 7, 8 }[smode]; // depending on smeter more/less cw-text
@@ -5427,6 +5636,9 @@ void loop()
 #endif //CAT_EXT
       event = SC;
       int32_t t0 = millis();
+#ifdef WSPR_BEACON
+      wspr_press = t0;  // moment the button went down (the click itself is only known ~0.5 s later)
+#endif
       for(; inv ^ _digitalRead(BUTTONS);){ // until released or long-press
         if((millis() - t0) > 300){ event = PL; break; }
         wdt_reset();
@@ -5447,6 +5659,12 @@ void loop()
     } else {  // hack: fast forward handling
       event = (event&0xf0) | ((encoder_val) ? PT : PLC/*PL*/);  // only alternate between push-long/turn when applicable
     }
+#ifdef WSPR_BEACON
+    if(wspr_state && (menumode == 0)){  // beacon on: a right-button click syncs it (when waiting for that), any other press stops it
+      if((wspr_state == 1) && (event == (BR|SC))) wspr_sync(); else wspr_stop();
+      event = 0;
+    }
+#endif
     switch(event){
 #ifndef ONEBUTTON
       case BL|PL:  // Called when menu button pressed
@@ -5871,6 +6089,10 @@ void loop()
     if((cw_tx(cw_msg[cw_msg_id]) == 0) && ((cw_msg[cw_msg_id][0] == 'C') && (cw_msg[cw_msg_id][1] == 'Q')) && cw_msg_interval) cw_msg_event = millis() + 1000 * cw_msg_interval; else cw_msg_event = 0;  // then send message, if not interrupted and its a CQ msg and there is an interval set, then schedule new event
   }
 #endif //CW_MESSAGE
+
+#ifdef WSPR_BEACON
+  wspr_poll();
+#endif
 
   wdt_reset();
 

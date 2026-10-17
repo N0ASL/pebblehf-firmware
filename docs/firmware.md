@@ -25,6 +25,16 @@ avr-gcc 7.3.0, ArduinoCore-avr 1.8.6, board "Arduino Uno" (32,256 bytes flash us
 
 Free flash in the official build: **≈5.4 KB**. This fork keeps DIAG on.
 
+### This fork's switches
+
+| Switch | Adds | Flash | RAM left for stack |
+|---|---|---|---|
+| `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.1–5.5 ([docs](wspr-beacon.md)) | +3,066 (29,960 total) | 852 |
+
+With all of this fork's switches off, the build is byte-identical to the official firmware.
+
+Host tests: `python3 test/wspr_encoder_test.py`, `python3 test/wspr_beacon_sim.py` (need a C++ compiler).
+
 ### Built-in optional switches (already in the source, off in the Pebble HF build)
 
 Measured as single additions to the official build:
