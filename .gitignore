@@ -1,0 +1,8 @@
+build/
+*.hex
+*.bak
+*.backup
+.DS_Store
+
+utils/logs/
+*.elf

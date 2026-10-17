@@ -1,0 +1,129 @@
+> **This is N0ASL's private fork of the Pebble HF firmware** ([mspiceland/usdx-pebblehf](https://github.com/mspiceland/usdx-pebblehf)).
+> It tracks N4FFF's releases (currently **1.0.7**) and adds optional features behind build switches, all **off by default**, so a default build is identical to the official firmware.
+>
+> | Addition | Switch | Status |
+> |---|---|---|
+> | Stand-alone WSPR beacon (call/grid/power/interval menus, manual sync on the even minute) | `WSPR_BEACON` | planned, see [`docs/wspr-beacon.md`](docs/wspr-beacon.md) |
+>
+> Fork notes: [`docs/firmware.md`](docs/firmware.md) (building, flash/RAM sizes, built-in optional switches), [`docs/hardware-notes.md`](docs/hardware-notes.md) (V2.5 board notes, CAT over the LCD lines; Pico interface parked).
+> Update from upstream: `git fetch upstream && git merge upstream/main`.
+>
+> Credits: Pebble HF hardware by Barbaros Asuroglu WB2CBA; Pebble HF firmware by Mike N4FFF (project with Becky N4BKY); original uSDX by Guido PE1NNZ. MIT license, see [`LICENSE`](LICENSE).
+
+---
+
+# Pebble HF: An Ultra-Affordable HF Radio for Everyone
+
+
+Pebble HF is an experimental QRP radio designed to get more people into HF radio with a General class amateur radio license and outdoor radio operation. It is an ultra-inexpensive 20-meter single-band transceiver built for accessibility and simplicity.
+
+![Pebble HF](https://pebblehf.com/images/Pebble%20HF.jpg)
+**For more information, visit [pebblehf.com](https://pebblehf.com)**
+
+## Credits
+
+This project is built on the shoulders of giants from the open source [uSDX project](https://github.com/threeme3/usdx):
+
+- **Hardware Design**: [Barbaros Asuroglu, WB2CBA](https://github.com/WB2CBA/PEBBLE-20m-HF-TRANSCEIVER)
+- **Pebble HF Firmware & Project**: Mike N4FFF
+- **Original uSDX Firmware**: Guido PE1NNZ (pe1nnz@qsl.net)
+
+The Pebble HF firmware is a modified version of the uSDX firmware, optimized for the Pebble HF hardware platform.
+
+## About the Radio
+
+Amateur radio is a fantastic hobby for learning, connection, and adventure — and small, portable radios are perfect for getting on HF, connecting with people around the world, and outdoor radio adventures like POTA and SOTA.
+
+Pebble HF was purpose-designed to be ultra-affordable and easy to build. It is a single-band 20-meter QRP transceiver that supports CW (morse code), SSB voice (USB/LSB), and digital modes such as FT8, JS8, and FT4. The hardware was designed from the ground up by Barb WB2CBA with cost and kit-friendliness in mind — nearly all parts are pre-soldered surface mount, leaving only 14 easy through-hole parts for the builder. Most people complete the build in under an hour.
+
+Despite its simplicity, Pebble HF is a capable software-defined radio. Both the transmitter and receiver run on a single ATMEGA328P microcontroller. The transmitter uses an efficient Class-E power amplifier driven entirely by digital signal processing, and the receiver implements DSP filtering, AGC, noise reduction, and more — all in software. This keeps the parts count low, the design simple, and the radio highly power-efficient.
+
+- **~5W output** on 7–14V battery power, **~1W on USB-C** (5V) — get on the air even without a dedicated battery
+- **Weighs less than 4.7 oz (132g)** — perfect for portable operation
+- **Built-in CW key and microphone** — nothing extra needed to start making contacts
+- **Open source hardware and firmware** — hack it, improve it, share it
+
+Our mission is simple: get more people into HF ham radio and outdoor radio!
+
+## List of Features
+
+- **Simple, fun and versatile QRP SSB HF transceiver** with embedded **DSP and SDR functions**
+- **20-meter single-band** operation (14.000 - 14.350 MHz)
+- **EER Class-E** driven SSB transmit-stage
+- Approximately **5W PEP SSB output** from 13.8V supply
+- **Mode support: USB, LSB, CW**
+- **DSP filters: Full, 3000, 2400, 1800, 500, 200, 100, 50 Hz passband**
+- **DSP features: Automatic Gain Control (AGC), Noise-reduction (NR), Voice-triggered Xmit (VOX), RX Attenuators (ATT), TX noise gate, TX drive control, Volume control, dBm/S-meter**
+- SSB opposite side-band/carrier suppression **Transmit: better than -45dBc, IMD3 (two-tone) -33dBc, Receive: better than -50dBc**
+- **Open source** firmware, built with Arduino IDE; allows experimentation, new features can be added, contributions can be shared via Github, software-complexity: 2000 lines of code
+- Software-based **VOX** that can be used as **fast Full Break-In** (QSK and semi-QSK operation) or assist in RX/TX switching for operating digital modes (no CAT or PTT interface required), external PTT output/PA control with **TX-delay**
+- **Lightweight and low-cost transceiver design**: because of the EER-transmitter class-E stage it is **highly power-efficient** (no bulky heatsinks required), and has a **simple design** (no complex balanced linear power amplifier required)
+- **Fully digital and software-based SSB transmit-stage**: samples microphone-input and reconstruct a SSB-signal by controlling the phase of the SI5351 PLL (through tiny frequency changes over 800kbits/s I2C) and the amplitude of the PA (through PWM of the PA key-shaping circuit)
+- **Fully digital and software-based SDR receiver-stages (optionally)**: samples I/Q (complex) signal from Quadrature Sampling Detector digital mixer, and performs a 90-degree phase-shift mathematically in software (Hilbert-transform) and cancels out one side-band by adding them
+- **CW decoder**, Straight/Iambic-A/B **keyer**
+- **VFO A/B + RIT**, and corresponding relay band-filter switching via I2C
+- Probably the most **cost effective** and **easy** to build standalone SDR/SSB transceiver that you can find. Very much **simplified** circuit and **versatile** in use.
+
+
+## Hardware
+
+The Pebble HF hardware is designed by [Barbaros Asuroglu, WB2CBA](https://github.com/WB2CBA/PEBBLE-20m-HF-TRANSCEIVER). For hardware schematics, bill of materials, and build information, see [Barb's hardware repository on GitHub](https://github.com/WB2CBA/PEBBLE-20m-HF-TRANSCEIVER). For general project information, visit [pebblehf.com](https://pebblehf.com).
+
+This project is based on the original uSDX design. For other uSDX hardware variants, see the [uSDX Forum].
+
+## Operation
+
+Pebble HF has three controls: a **tuning knob** (rotary encoder), a **MENU button** (left), and a **SELECT button** (right).
+
+- **Tune:** Turn the encoder to change frequency (locked to 14.000–14.350 MHz).
+- **Volume:** Press and hold the encoder while turning. Turning below 0 powers off the radio.
+- **Step size:** Short press encoder to increase, long press to decrease.
+- **Filter:** Double-click SELECT (right) to cycle through DSP filter bandwidths.
+- **VFO/RIT:** Long press SELECT (right) to toggle RIT, then again to swap VFO A/B.
+- **Menu:** Short press MENU (left) to enter. Turn encoder to browse, press MENU to edit a value, press SELECT to save/exit.
+- **Factory reset:** Hold encoder button during power-up.
+
+Pebble HF has a built-in straight key and microphone. An external key or mic can be connected to the key/mic jack. Plugging something into the jack disables the built-in mic. **Always have a paddle plugged in when using Iambic A/B keyer mode** — otherwise the onboard mic may falsely trigger the keyer.
+
+> **For the full operating manual including all menu options, see [OPERATING_MANUAL.md](OPERATING_MANUAL.md).**
+
+## Firmware
+
+The radio comes pre-programmed. If you need to update the firmware, see the dedicated programming guide:
+
+> **For full firmware update instructions — including the easy web-based updater and the command-line (avrdude) method — see [PROGRAMMING.md](PROGRAMMING.md).**
+
+## Changelog
+
+| Version | Changes |
+|---------|---------|
+| **1.0.7** | Fix critical CW RX bug from 1.0.3 — wanted signal was placed on the rejected-image side, making strong signals weak/inaudible while a loud image appeared ~1.2 kHz above. Reverted CW RX/TX oscillator config to the proven original; configurable CW tone retained |
+| **1.0.6** | Fix audible "thump" between CW dits/dahs caused by sudden RX audio onset — RX audio now fades in briefly after each CW TX→RX transition (no change to RF envelope or sidetone) |
+| **1.0.5** | Noise Gate setting now only applies in VOX mode; voice PTT uses optimal low threshold automatically |
+| **1.0.4** | Fix VOX spurious TX from sound card DC bias on Tip/DIT pin — skip hardware PTT check when VOX is enabled |
+| **1.0.3** | Fix CW sidetone offset direction — changing sidetone frequency now shifts received pitch in the same direction |
+| **1.0.2** | Add configurable CW tone menu option (300–900 Hz), encoder startup cleanup |
+| **1.0.1** | Decouple EEPROM version ID from firmware version string, menu version label update |
+| **1.0.0** | Fork from upstream uSDX 1.02x — new versioning scheme, version display with compile date |
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Credits
+
+**Pebble HF Project**: Mike N4FFF - Firmware modifications and project maintenance
+
+**Original uSDX Project**: The uSDX was originally announced in the [QRPLabs Forum] as a SSB modification for a [QCX]. The [uSDX] transmitter and receiver stage both running on a ATMEGA328P, including its multiband front-end and direct PA biasing/envelope-generation technique; its concept, circuit, code are a design by _Guido (PE1NNZ)_; the software-based SSB transmit stage is a derivate of earlier experiments with a [digital SSB generation technique] on a Raspberry Pi.
+
+**Hardware Design**: [Barbaros Asuroglu (WB2CBA)](https://github.com/WB2CBA/PEBBLE-20m-HF-TRANSCEIVER) - Pebble HF hardware design
+
+Many thanks to all contributors to the open source uSDX project, without whose work the Pebble HF would not be possible.
+
+<!-- Link references -->
+[uSDX]: https://github.com/threeme3/usdx
+[uSDX Forum]: https://groups.io/g/ucx
+[QRPLabs Forum]: https://groups.io/g/QRPLabs/topic/29572792
+[QCX]: https://qrp-labs.com/qcx.html
+[digital SSB generation technique]: http://pe1nnz.nl.eu.org/2013/05/direct-ssb-generation-on-pll.html
+
