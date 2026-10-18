@@ -106,7 +106,7 @@ Press the MENU (left) button to enter the menu. Turn the encoder to scroll throu
 | 5.4 | WSPR TX % | 5, 10, 25, 50 % | Share of 2-minute slots used for transmitting |
 | 5.5 | WSPR Offset | -90 to +90 Hz, Random | Shifts the signal within the WSPR window |
 | 5.6 | WSPR Max TX | No limit, 1, 2, 3, 5, 10 | Beacon stops after this many transmissions |
-| 5.7 | WSPR Beacon | OFF, ON | Starts the beacon; not stored |
+| 5.7 | WSPR Beacon | (click to start) | Starts the beacon and closes the menu |
 | 8.1 | PA Bias min | 0–255 | PA PWM level for 0% RF output |
 | 8.2 | PA Bias max | 0–255 | PA PWM level for 100% RF output |
 | 8.3 | Ref freq | 14000000–28000000 | SI5351 crystal frequency calibration |
@@ -388,7 +388,7 @@ Displays the firmware version number and compile date. Useful for verifying whic
 
 ### 5.0 WSPR Menu and 5.1-5.7 (this fork)
 
-5.0 is one entry that opens the WSPR list: click it and 5.1 to 5.7 scroll round. SELECT goes back to the main list. Setting 5.7 WSPR Beacon to ON and pressing SELECT closes the menu; click SELECT at the start of an even minute to sync, and the first transmission starts 1 s later. Offset moves the signal by a fixed amount or randomly for each transmission; Max TX ends the run with `WSPR done`. Details: [docs/wspr-beacon.md](docs/wspr-beacon.md).
+5.0 is one entry that opens the WSPR list: click it and 5.1 to 5.7 scroll round. SELECT goes back to the main list. Clicking 5.7 WSPR Beacon starts the beacon and closes the menu; click SELECT at the start of an even minute to sync, and the first transmission starts 1 s later. Offset moves the signal by a fixed amount or randomly for each transmission; Max TX ends the run with `WSPR done`. Details: [docs/wspr-beacon.md](docs/wspr-beacon.md).
 
 ---
 

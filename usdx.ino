@@ -4851,7 +4851,11 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
                   }
                   if((action == LOAD) && (wspr_max > 5)) wspr_max = 0;
                   break;
-    case WSPR_RUN:  if((action == UPDATE) || (action == UPDATE_MENU)) paramAction(action, wspr_on, 0x57, F("WSPR Beacon"), offon_label, 0, 1, false); break;  // not stored
+    case WSPR_RUN:  // a click starts the beacon (it then waits for the sync click) and closes the menu; not stored
+                  if(action == UPDATE_MENU){
+                    if(menumode >= 2){ wspr_on = 1; menumode = 0; }
+                    else { printlabel(action, 0x57, F("WSPR Beacon")); lcd.print(F("click to start")); lcd_blanks(); }
+                  } break;
 #endif //WSPR_BEACON
     case PWM_MIN: paramAction(action, pwm_min, 0x81, F("PA Bias min"), NULL, 0, pwm_max - 1, false); break;
     case PWM_MAX: paramAction(action, pwm_max, 0x82, F("PA Bias max"), NULL, pwm_min, 255, false); break;
@@ -5995,27 +5999,19 @@ void loop()
           change = true;
         } else {
 #ifdef WSPR_BEACON
-          if((menumode == 1) && wspr_sub && !wspr_on){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
+          if((menumode == 1) && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
 #endif
           if(menumode == 1){ menumode = 0; }  // short right-click while in menu: exit menu
-          if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); // short right-click while in value selection screen: save, and return to menu screen
-#ifdef WSPR_BEACON
-            if((menu == WSPR_RUN) && wspr_on) menumode = 0;  // beacon switched on: close the menu
-#endif
-          }
+          if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); } // short right-click while in value selection screen: save, and return to menu screen
         }
 #else
         // Single click on right button: only handle menu navigation, no mode change
         if(menumode){
 #ifdef WSPR_BEACON
-          if((menumode == 1) && wspr_sub && !wspr_on){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
+          if((menumode == 1) && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
 #endif
           if(menumode == 1){ menumode = 0; }  // short right-click while in menu: exit menu
-          if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); // short right-click while in value selection screen: save, and return to menu screen
-#ifdef WSPR_BEACON
-            if((menu == WSPR_RUN) && wspr_on) menumode = 0;  // beacon switched on: close the menu
-#endif
-          }
+          if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); } // short right-click while in value selection screen: save, and return to menu screen
         }
         // When not in menu mode, single click does nothing (mode change disabled)
 #endif //MODE_BUTTON_CHANGE
@@ -6202,7 +6198,6 @@ void loop()
   } else event = 0;  // no button pressed: reset event
 
 #ifdef WSPR_BEACON
-  if(wspr_sub && (menumode == 1) && (menu == WSPR_RUN) && wspr_on) menumode = 0;  // beacon switched on: close the menu, however the value screen was left
   if(!menumode && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; }  // left the menu from inside the WSPR menu: next time start at its entry
 #endif
   if((menumode) || (prev_menumode != menumode)){  // Show parameter and value
