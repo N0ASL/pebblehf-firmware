@@ -5995,7 +5995,7 @@ void loop()
           change = true;
         } else {
 #ifdef WSPR_BEACON
-          if((menumode == 1) && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
+          if((menumode == 1) && wspr_sub && !wspr_on){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
 #endif
           if(menumode == 1){ menumode = 0; }  // short right-click while in menu: exit menu
           if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); // short right-click while in value selection screen: save, and return to menu screen
@@ -6008,7 +6008,7 @@ void loop()
         // Single click on right button: only handle menu navigation, no mode change
         if(menumode){
 #ifdef WSPR_BEACON
-          if((menumode == 1) && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
+          if((menumode == 1) && wspr_sub && !wspr_on){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
 #endif
           if(menumode == 1){ menumode = 0; }  // short right-click while in menu: exit menu
           if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); // short right-click while in value selection screen: save, and return to menu screen
@@ -6202,6 +6202,7 @@ void loop()
   } else event = 0;  // no button pressed: reset event
 
 #ifdef WSPR_BEACON
+  if(wspr_sub && (menumode == 1) && (menu == WSPR_RUN) && wspr_on) menumode = 0;  // beacon switched on: close the menu, however the value screen was left
   if(!menumode && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; }  // left the menu from inside the WSPR menu: next time start at its entry
 #endif
   if((menumode) || (prev_menumode != menumode)){  // Show parameter and value
