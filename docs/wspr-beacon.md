@@ -17,7 +17,7 @@ Nothing else changes; DIAG stays on, CAT stays off. With the switch off the buil
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|
 | Official | 26,894 | 1,022 | 1,026 |
-| `WSPR_BEACON` | 29,960 (92%) | 1,196 | 852 |
+| `WSPR_BEACON` | 29,958 (92%) | 1,196 | 852 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
 
@@ -33,13 +33,13 @@ Menu entries (section 5):
 | 5.4 WSPR Every | 2 / 4 / 6 / 10 / 20 min | time between transmission starts; default 10 |
 | 5.5 WSPR Beacon | OFF / ON | not stored; always OFF at power-up |
 
-Text entry uses the firmware's string editor: turn the knob to change a character, click the knob to move to the next character, left button to save.
+Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the **VFO knob** (turn and click) and the **PTT** key. Text entry uses the firmware's string editor: turn the VFO knob to change a character, click the VFO knob to move to the next character, MENU to save and return to the main screen (SELECT saves and returns to the menu list).
 
 1. Set call, grid, power and interval once (they are saved).
-2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `R at even minute` (or `WSPR: bad call` / `WSPR: bad grid`).
-3. Watch the phone's clock and **click the right button the moment an even minute starts** (e.g. 14:32:00). The moment the button goes down is used, not the end of the click.
-4. The first transmission starts 1 s later and lasts 110.6 s (top line `WSPR TX` and symbols left). Between transmissions the top line counts down (`WSPR next 8:21`); the radio receives normally, and the knob still tunes.
-5. **Any button press stops the beacon** (also during a transmission, as does the key/PTT). Switch it on again from the menu and re-sync.
+2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`).
+3. Watch the phone's clock and **click SELECT the moment an even minute starts** (e.g. 14:32:00). The moment the button goes down is used, not the end of the click.
+4. The first transmission starts 1 s later and lasts 110.6 s (top line `WSPR TX` and symbols left). Between transmissions the top line counts down (`WSPR next 8:21`); the radio receives normally, and the VFO knob still tunes.
+5. **MENU, SELECT or a VFO knob click stops the beacon**, between or during transmissions. PTT stops a transmission in progress (and the beacon); between transmissions PTT keys the radio normally. To restart, switch 5.5 on again and re-sync with SELECT.
 
 Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's crystal drifts a few seconds a day.
 

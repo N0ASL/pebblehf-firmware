@@ -53,7 +53,7 @@
 //#define CW_FREQS_FISTS 1   // Defaults to CW FISTS frequencies when changing bands
 //#define CW_MESSAGE       1   // Transmits pre-defined CW messages on-demand (left-click menu item 4.2)
 //#define CW_MESSAGE_EXT 1   // Additional CW messages
-//#define WSPR_BEACON    1   // Stand-alone WSPR beacon (menu 5.1-5.5): callsign, grid, power, interval; sync by pressing the right button on an even minute
+//#define WSPR_BEACON    1   // Stand-alone WSPR beacon (menu 5.1-5.5): callsign, grid, power, interval; sync by clicking SELECT (right button) on an even minute
 //#define TX_DELAY       1   // Enables a delay in the actual transmission to allow relay-switching to be completed before the power is applied (see also NTX, PTX definitions below for GPIO that can switch relay/PA)
 //#define NTX            11  // Enables LOW  on TX, used as PTT out to enable external PAs (a value of 11 means PB3 is used)
 //#define PTX            11  // Enables HIGH on TX, used as PTT out to enable external PAs (a value of 11 means PB3 is used)
@@ -4165,7 +4165,7 @@ void wspr_poll(){  // called from loop()
     uint8_t r = wspr_encode(wspr_call, wspr_grid, wspr_dbm[wspr_pwr]);  // "WSPR Beacon" switched on in the menu
     if(r){ wspr_on = 0; wspr_status((r == 1) ? F("WSPR: bad call") : F("WSPR: bad grid")); return; }
     wspr_state = 1;
-    wspr_status(F("R at even minute"));
+    wspr_status(F("SEL at even min"));
     return;
   }
   if(wspr_state != 2) return;
@@ -5660,7 +5660,7 @@ void loop()
       event = (event&0xf0) | ((encoder_val) ? PT : PLC/*PL*/);  // only alternate between push-long/turn when applicable
     }
 #ifdef WSPR_BEACON
-    if(wspr_state && (menumode == 0)){  // beacon on: a right-button click syncs it (when waiting for that), any other press stops it
+    if(wspr_state && (menumode == 0)){  // beacon on: a SELECT (right button) click syncs it when waiting for that; any other press (MENU, SELECT, VFO knob) stops it
       if((wspr_state == 1) && (event == (BR|SC))) wspr_sync(); else wspr_stop();
       event = 0;
     }
