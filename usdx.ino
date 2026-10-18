@@ -4448,16 +4448,30 @@ template<typename T> void paramAction(uint8_t action, volatile T& value, uint8_t
 
 #ifdef MENU_STR
 static uint8_t pos = 0;
+#ifdef WSPR_BEACON
+uint8_t str_alnum = 0;  // set while editing the WSPR call/grid: only space, 0-9, A-Z, wrapping around; cursor stays within size
+#endif
 void paramAction(uint8_t action, char* value, uint8_t menuid, const __FlashStringHelper* label, uint8_t size){
   const uint8_t _min = ' '; const uint8_t _max = 'Z';
   switch(action){
     case NEXT_CH:
+#ifdef WSPR_BEACON
+      if(str_alnum){ if(pos < size - 1) pos++; } else
+#endif
       if(pos < size) pos++;  // allow to go to next character when string size allows and when current character is not string end
       action = UPDATE_MENU; //fall-through next case
     case UPDATE:
     case UPDATE_MENU:
       if(menumode != 3) pos = 0;
       if(menumode == 2) menumode = 3; // hack: for strings enter in edit mode
+#ifdef WSPR_BEACON
+      if(str_alnum){  // character order: space, 0-9, A-Z (37 characters), wrapping around at both ends
+        char ch = value[pos];
+        int16_t i = (ch >= 'A' && ch <= 'Z') ? ch - 'A' + 11 : (ch >= '0' && ch <= '9') ? ch - '0' + 1 : 0;
+        i = (i + encoder_val) % 37; if(i < 0) i += 37;
+        value[pos] = (i == 0) ? ' ' : (i <= 10) ? '0' + i - 1 : 'A' + i - 11;
+      } else
+#endif
       if(((value[pos] + encoder_val) < _min) || ((value[pos] + encoder_val) == 0)) value[pos] = _min;
       else if((value[pos] + encoder_val) > _max) value[pos] = _max;
       else value[pos] = value[pos] + encoder_val;
@@ -4616,8 +4630,10 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
     case WSPR_PWR:
     case WSPR_EVERY: {
       int _addr = eeprom_addr;
+      str_alnum = 1;
       if(id == WSPR_CALL){  eeprom_addr = WSPR_EEPROM;      paramAction(action, wspr_call, 0x51, F("WSPR Call"), 6); }
       if(id == WSPR_GRID){  eeprom_addr = WSPR_EEPROM + 6;  paramAction(action, wspr_grid, 0x52, F("WSPR Grid"), 4); }
+      str_alnum = 0;
       if(id == WSPR_PWR){   eeprom_addr = WSPR_EEPROM + 10; paramAction(action, wspr_pwr, 0x53, F("WSPR Power"), wspr_pwr_label, 0, _N(wspr_dbm) - 1, false); }
       if(id == WSPR_EVERY){ eeprom_addr = WSPR_EEPROM + 11; paramAction(action, wspr_every, 0x54, F("WSPR Every"), wspr_every_label, 0, _N(wspr_min) - 1, false); }
       eeprom_addr = _addr;

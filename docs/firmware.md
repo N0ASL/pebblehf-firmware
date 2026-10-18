@@ -29,7 +29,7 @@ Free flash in the official build: **≈5.4 KB**. This fork keeps DIAG on.
 
 | Switch | Adds | Flash | RAM left for stack |
 |---|---|---|---|
-| `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.1–5.5 ([docs](wspr-beacon.md)) | +3,064 (29,958 total) | 852 |
+| `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.1–5.5 ([docs](wspr-beacon.md)) | +3,220 (30,114 total) | 851 |
 
 With all of this fork's switches off, the build is byte-identical to the official firmware.
 

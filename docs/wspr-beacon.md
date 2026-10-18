@@ -17,7 +17,7 @@ Nothing else changes; DIAG stays on, CAT stays off. With the switch off the buil
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|
 | Official | 26,894 | 1,022 | 1,026 |
-| `WSPR_BEACON` | 29,958 (92%) | 1,196 | 852 |
+| `WSPR_BEACON` | 30,114 (93%) | 1,197 | 851 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
 
@@ -33,7 +33,7 @@ Menu entries (section 5):
 | 5.4 WSPR Every | 2 / 4 / 6 / 10 / 20 min | time between transmission starts; default 10 |
 | 5.5 WSPR Beacon | OFF / ON | not stored; always OFF at power-up |
 
-Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the **VFO knob** (turn and click) and the **PTT** key. Text entry uses the firmware's string editor: turn the VFO knob to change a character, click the VFO knob to move to the next character, MENU to save and return to the main screen (SELECT saves and returns to the menu list).
+Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the **VFO knob** (turn and click) and the **PTT** key. Text entry uses the firmware's string editor: turn the VFO knob to change a character, click the VFO knob to move to the next character, MENU to save and return to the main screen (SELECT saves and returns to the menu list). For the call and grid the characters are limited to space, 0–9 and A–Z, in that order, wrapping around (turning down from a blank gives Z, Y, X…), and the cursor stops at the last position (6th for the call, 4th for the grid).
 
 1. Set call, grid, power and interval once (they are saved).
 2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`).
