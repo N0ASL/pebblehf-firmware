@@ -6,3 +6,4 @@ build/
 
 utils/logs/
 *.elf
+__pycache__/
