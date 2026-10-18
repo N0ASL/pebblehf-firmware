@@ -4135,7 +4135,7 @@ void wspr_sync(){  // the press that started at wspr_press marks the start of an
 
 uint8_t wspr_tx(){  // one 110.6 s transmission; returns 1 when stopped by a button or the key
   uint8_t _mode = mode;
-  uint8_t stop = 0;
+  uint8_t stop = 0, shown = 0;
   mode = CW;  // constant carrier; switch_rxtx() then keys at (PLL frequency - cw_offset)
   wspr_status(F("WSPR TX"));
   si5351.freq(WSPR_FREQ + cw_offset, rx_ph_q, 0);  // same PLL set-up as CW receive, so that TX lands on WSPR_FREQ
@@ -4144,7 +4144,8 @@ uint8_t wspr_tx(){  // one 110.6 s transmission; returns 1 when stopped by a but
   for(uint8_t k = 0; (k != 162) && !stop; k++){
     si5351.freq_calc_fine(-(int32_t)cw_offset * 256 + wspr_symbol(k) * 375);  // tone spacing 12000/8192 Hz = 375/256 Hz
     si5351.SendPLLRegisterBulk();
-    if((k & 7) == 0){ lcd.setCursor(8, 0); lcd.print(162 - k); lcd.print(' '); }  // symbols left
+    { uint8_t left = (uint32_t)(162 - k) * 8192 / 12000;  // seconds left, shown as "WSPR TX 110s"
+      if((k == 0) || (left != shown)){ shown = left; lcd.setCursor(8, 0); lcd.print(left); lcd.print('s'); lcd.print(' '); lcd.print(' '); } }
     uint32_t end = t0 + (uint32_t)(k + 1) * 8192 * (F_MCU / 16000) / 12000;    // symbol length 8192/12000 s
     while((int32_t)(millis() - end) < 0){
       wdt_reset();

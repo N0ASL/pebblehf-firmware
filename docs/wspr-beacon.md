@@ -1,6 +1,6 @@
 # WSPR beacon (`WSPR_BEACON`)
 
-Status (17 Oct 2026): **written and host-tested, not yet tried on a radio.** Developed on the `wspr-beacon` branch; merged into `main` once it has worked on the air.
+Status (17 Oct 2026): **first build decoded on the air (WSJT-X); later editor and display changes not yet tried on a radio.** Developed on the `wspr-beacon` branch; merged into `main` once it has worked on the air.
 
 A stand-alone WSPR beacon inside the Pebble HF firmware: no Pico, phone or computer attached. It sends a standard WSPR message (callsign, 4-character grid, power) on one fixed frequency in the 20 m WSPR window.
 
@@ -17,7 +17,7 @@ Nothing else changes; DIAG stays on, CAT stays off. With the switch off the buil
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|
 | Official | 26,894 | 1,022 | 1,026 |
-| `WSPR_BEACON` | 30,254 (93%) | 1,197 | 851 |
+| `WSPR_BEACON` | 30,354 (94%) | 1,197 | 851 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
 
@@ -38,7 +38,7 @@ Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the 
 1. Set call, grid, power and interval once (they are saved).
 2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`).
 3. Watch the phone's clock and **click SELECT the moment an even minute starts** (e.g. 14:32:00). The moment the button goes down is used, not the end of the click.
-4. The first transmission starts 1 s later and lasts 110.6 s (top line `WSPR TX` and symbols left). Between transmissions the top line counts down (`WSPR next 8:21`); the radio receives normally, and the VFO knob still tunes.
+4. The first transmission starts 1 s later and lasts 110.6 s (top line `WSPR TX 110s`, counting down the seconds left). Between transmissions the top line counts down (`WSPR next 8:21`); the radio receives normally, and the VFO knob still tunes.
 5. **MENU, SELECT or a VFO knob click stops the beacon**, between or during transmissions. PTT stops a transmission in progress (and the beacon); between transmissions PTT keys the radio normally. To restart, switch 5.5 on again and re-sync with SELECT.
 
 Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's crystal drifts a few seconds a day.
