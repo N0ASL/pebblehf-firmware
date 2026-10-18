@@ -1,6 +1,6 @@
 # Frequency presets and A/B swap (`FREQ_PRESETS`)
 
-Eight saved 20 m frequencies (each with its mode), reached with one press of Select, and a quick VFO A/B swap. On in this branch (switch near the top of `usdx.ino`); +1,142 bytes of flash over the beacon build, no extra RAM to speak of.
+Eight saved 20 m frequencies (each with its mode), reached with one press of Select, and a quick VFO A/B swap. On in this branch (switch near the top of `usdx.ino`); about +1,200 bytes of flash over the beacon build, no extra RAM to speak of.
 
 Names follow the Pebble HF field reference: **Tuning Knob** (turn / press), **Menu Button** (left), **Select Button** (right).
 
@@ -9,6 +9,7 @@ Names follow the Pebble HF field reference: **Tuning Knob** (turn / press), **Me
 | From the main screen | What happens |
 |---|---|
 | Short press **Select** | Opens the preset picker (the press does nothing otherwise, as the mode-cycling option is off). |
+| Menu **1.14 Presets** | Browse to it (`click to open`) and click: opens the same picker. This is the way to find the feature without knowing the shortcut. |
 | **Double click Tuning Knob** | Swaps VFO A and B (also saved, so the radio starts on the same VFO). Before this, the only ways were menu 1.6 or two long presses of Select with RIT in between. |
 
 In the picker the radio shows the keys on the top line and the slot on the bottom:

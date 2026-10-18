@@ -1,6 +1,6 @@
 # Fork notes: building the firmware
 
-`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. In the `wspr-beacon` branch `WSPR_BEACON` is on and `DIAG` is off by default; commenting out `WSPR_BEACON`, `FREQ_PRESETS` and `VERSION_TAG` and restoring `DIAG` gives the official build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up. A default build is the official firmware.
+`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. In the `wspr-beacon` branch `WSPR_BEACON` is on and `DIAG` is off by default; commenting out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP` and `VERSION_TAG` and restoring `DIAG` gives the official build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up. A default build is the official firmware.
 
 ## Building
 
@@ -31,8 +31,9 @@ Free flash in the official build: **≈5.4 KB**. The `wspr-beacon` branch turns 
 |---|---|---|---|
 | `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.1–5.5 ([docs](wspr-beacon.md)) | +3,824 (30,718 total) | 847 |
 | `WSPR_BEACON`, `DIAG` off | as above, without the startup self-test | 29,402 total | 847 |
-| `FREQ_PRESETS` | 8 frequency presets, Select opens the picker, Tuning Knob goes, Select stores; Tuning Knob double click swaps A/B ([docs](presets.md)) | +1,142 | 833 (with the beacon) |
-| branch default: beacon, presets, `DIAG` off | | 30,564 total (94%) | 833 |
+| `MENU_WRAP` | the menu scrolls round (past the last item comes the first, and the other way) | about +20 | 833 |
+| `FREQ_PRESETS` | 8 frequency presets, menu 1.14 Presets,, Select opens the picker, Tuning Knob goes, Select stores; Tuning Knob double click swaps A/B ([docs](presets.md)) | +1,142 | 833 (with the beacon) |
+| branch default: beacon, presets, `DIAG` off | | 30,630 total (94%) | 833 |
 
 With this fork's switches off and `DIAG` on, the build is byte-identical to the official firmware.
 

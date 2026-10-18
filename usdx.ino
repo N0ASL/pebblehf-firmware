@@ -54,6 +54,7 @@
 //#define CW_FREQS_FISTS 1   // Defaults to CW FISTS frequencies when changing bands
 //#define CW_MESSAGE       1   // Transmits pre-defined CW messages on-demand (left-click menu item 4.2)
 //#define CW_MESSAGE_EXT 1   // Additional CW messages
+#define MENU_WRAP      1   // Menu scrolls round: past the last item comes the first and the other way
 #define FREQ_PRESETS   1   // Frequency presets (menu 1.14 Preset, 1.15 Preset Save): step through saved 20m frequencies/modes, store the current one
 #define WSPR_BEACON    1   // Stand-alone WSPR beacon (menu 5.1-5.5): callsign, grid, power, TX %; sync by clicking SELECT (right button) on an even minute
 //#define TX_DELAY       1   // Enables a delay in the actual transmission to allow relay-switching to be completed before the power is applied (see also NTX, PTX definitions below for GPIO that can switch relay/PA)
@@ -4291,10 +4292,16 @@ void process_encoder_tuning_step(int8_t steps)
   change = true;
 }
 
+#ifdef FREQ_PRESETS
+extern uint8_t preset_pick;  // defined with the preset code below
+#endif
 void stepsize_showcursor()
 {
 #ifdef WSPR_BEACON
   if(wspr_state){ lcd.noCursor(); return; }
+#endif
+#ifdef FREQ_PRESETS
+  if(preset_pick){ lcd.noCursor(); return; }
 #endif
   lcd.setCursor(stepsize+1, 1);  // display stepsize with cursor
   lcd.cursor();
@@ -4639,15 +4646,25 @@ const char* agc_label[] = { "OFF", "Fast", "Slow" };
 #else
 #define N_PARAMS_WSPR 0
 #endif
-#define N_PARAMS (45 + N_PARAMS_WSPR)  // number of (visible) parameters
+#ifdef FREQ_PRESETS
+#define N_PARAMS_PRESET 1
+#else
+#define N_PARAMS_PRESET 0
+#endif
+#define N_PARAMS (45 + N_PARAMS_WSPR + N_PARAMS_PRESET)  // number of (visible) parameters
 
 #define N_ALL_PARAMS (N_PARAMS+5)  // number of parameters
 
-enum params_t {_NULL, VOLUME, MODE, FILTER, BAND, STEP, VFOSEL, RIT, AGC, NR, ATT, ATT2, SMETER, SWRMETER, CWDEC, CWTONE, SIDETONE_VOL, CWOFF, SEMIQSK, KEY_WPM, KEY_MODE, KEY_PIN, KEY_TX, VOX, VOXGAIN, DRIVE, TXDELAY, MOX, CWINTERVAL, CWMSG1, CWMSG2, CWMSG3, CWMSG4, CWMSG5, CWMSG6,
+enum params_t {_NULL, VOLUME, MODE, FILTER, BAND, STEP, VFOSEL, RIT, AGC, NR, ATT, ATT2, SMETER, SWRMETER,
+#ifdef FREQ_PRESETS
+  PRESET,
+#endif
+  CWDEC, CWTONE, SIDETONE_VOL, CWOFF, SEMIQSK, KEY_WPM, KEY_MODE, KEY_PIN, KEY_TX, VOX, VOXGAIN, DRIVE, TXDELAY, MOX, CWINTERVAL, CWMSG1, CWMSG2, CWMSG3, CWMSG4, CWMSG5, CWMSG6,
 #ifdef WSPR_BEACON
   WSPR_CALL, WSPR_GRID, WSPR_PWR, WSPR_PCT, WSPR_RUN,
 #endif
   PWM_MIN, PWM_MAX, SIFXTAL, IQ_ADJ, CALIB, SR, CPULOAD, PARAM_A, PARAM_B, PARAM_C, SWVER, BACKL, FREQA, FREQB, MODEA, MODEB, VERS, ALL=0xff};
+static_assert(SWVER == N_PARAMS, "N_PARAMS must equal the id of the last visible menu item (SWVER)");
 
 int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
 {
@@ -4678,6 +4695,12 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
     case SMETER:  paramAction(action, smode, 0x1C, F("S-meter"), smode_label, 0, _N(smode_label) - 1, false); break;
 #ifdef SWR_METER
     case SWRMETER:  paramAction(action, swrmeter, 0x1D, F("SWR Meter"), swr_label, 0, _N(swr_label) - 1, false); break;
+#endif
+#ifdef FREQ_PRESETS
+    case PRESET:  if(action == UPDATE_MENU){
+                    if(menumode >= 2){ menumode = 0; preset_pick = 1; }  // a click opens the picker (the menu-exit code below draws it)
+                    else { printlabel(action, 0x1E, F("Presets")); lcd.print(F("click to open")); lcd_blanks(); }
+                  } break;
 #endif
 #ifdef CW_DECODER
     case CWDEC:   paramAction(action, cwdec, 0x21, F("CW Decoder"), offon_label, 0, 1, false); break;
@@ -6071,6 +6094,8 @@ void loop()
       menu += encoder_val;   // Navigate through menu
 #ifdef ONEBUTTON
       menu = max(0, min(menu, N_PARAMS));
+#elif defined(MENU_WRAP)
+      if(menu < 1) menu = N_PARAMS; else if(menu > N_PARAMS) menu = 1;  // scroll round
 #else
       menu = max(1 /* 0 */, min(menu, N_PARAMS));
 #endif

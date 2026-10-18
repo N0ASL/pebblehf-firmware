@@ -1,5 +1,5 @@
 > **This is N0ASL's private fork of the Pebble HF firmware** ([mspiceland/usdx-pebblehf](https://github.com/mspiceland/usdx-pebblehf)).
-> It tracks N4FFF's releases (currently **1.0.7**) and adds optional features behind build switches. In this branch the WSPR beacon is **on** and the startup self-test (`DIAG`) is **off**; to get the official firmware back, comment out `WSPR_BEACON`, `FREQ_PRESETS` and `VERSION_TAG` and uncomment `DIAG` (then the build is identical to the official one).
+> It tracks N4FFF's releases (currently **1.0.7**) and adds optional features behind build switches. In this branch the WSPR beacon is **on** and the startup self-test (`DIAG`) is **off**; to get the official firmware back, comment out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP` and `VERSION_TAG` and uncomment `DIAG` (then the build is identical to the official one).
 >
 > | Addition | Switch | Status |
 > |---|---|---|
