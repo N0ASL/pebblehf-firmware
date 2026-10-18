@@ -90,7 +90,7 @@ def main():
     r = subprocess.run([exe], capture_output=True, text=True)
     out = r.stdout; print(out, end="")
     want = ["14.0300 CW", "14.2855 USB", "14.0001 USB", "14.0000 LSB",
-            "top 'SEL=go KNOB=save'", "slot 1 VFO A 'A1 14.0300 CW  T'", "slot 6 VFO B 'B6 empty       T'",
+            "top 'KNOB=go SEL=save'", "slot 1 VFO A 'A1 14.0300 CW  T'", "slot 6 VFO B 'B6 empty       T'",
             "after store 'B6 14.1234 USB T'", "bad 0"]
     lines = out.split("\n")
     missing = [w for w in want if w not in lines]

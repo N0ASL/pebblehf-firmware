@@ -4401,7 +4401,7 @@ void preset_print(uint32_t v){  // "14.0300 CW " (frequency in MHz with 100 Hz r
 
 void preset_draw(){  // top line: the keys; bottom line: active VFO, slot number and its content. Column 15 is left to the T/R indicator.
   lcd.noCursor();
-  lcd.setCursor(0, 0); lcd.print(F("SEL=go KNOB=save"));
+  lcd.setCursor(0, 0); lcd.print(F("KNOB=go SEL=save"));
   lcd.setCursor(0, 1); lcd.print((vfosel % 2) ? 'B' : 'A'); lcd.print(preset_sel + 1); lcd.print(' ');  // "A1 14.0300 CW"
   uint32_t v = preset_get(preset_sel);
   uint8_t len = 3 + 11;
@@ -5798,8 +5798,8 @@ void loop()
     }
 #endif
 #ifdef FREQ_PRESETS
-    if(preset_pick){  // preset picker: Select = go, Tuning Knob press = store, Menu = cancel; everything else is ignored
-      if((event == (BR|SC)) && preset_get(preset_sel)){
+    if(preset_pick){  // preset picker: Tuning Knob press = go, Select = store, Menu = cancel; everything else is ignored
+      if((event == (BE|SC)) && preset_get(preset_sel)){
         uint32_t v = preset_get(preset_sel);
         freq = v & 0xFFFFFFUL; mode = v >> 24;
         vfomode[vfosel%2] = mode;
@@ -5810,7 +5810,7 @@ void loop()
         preset_pick = 0; show_banner(); change = true;
       }
       if(event == (BL|SC)){ preset_pick = 0; show_banner(); change = true; }
-      if(event == (BE|SC)) preset_store();
+      if(event == (BR|SC)) preset_store();
       event = 0;
     } else if((event == (BR|SC)) && (menumode == 0)){ preset_pick = 1; preset_draw(); event = 0; }  // Select short press in the main screen opens the picker
 #endif

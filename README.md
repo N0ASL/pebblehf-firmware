@@ -3,7 +3,7 @@
 >
 > | Addition | Switch | Status |
 > |---|---|---|
-> | Frequency presets (8 slots; Select opens the picker) and A/B swap (Tuning Knob double click) | `FREQ_PRESETS` | on in this branch, not yet tried on the radio; see [`docs/presets.md`](docs/presets.md) |
+> | Frequency presets (8 slots; Select opens the picker, Tuning Knob = go, Select = store) and A/B swap (Tuning Knob double click) | `FREQ_PRESETS` | on in this branch, not yet tried on the radio; see [`docs/presets.md`](docs/presets.md) |
 > | Stand-alone WSPR beacon (call/grid/power/TX % menus, manual sync on the even minute) | `WSPR_BEACON` | decoded on the air (bench test, dummy load); see [`docs/wspr-beacon.md`](docs/wspr-beacon.md) |
 >
 > Fork notes: [`docs/firmware.md`](docs/firmware.md) (building, flash/RAM sizes, built-in optional switches), [`docs/hardware-notes.md`](docs/hardware-notes.md) (V2.5 board notes, CAT over the LCD lines; Pico interface parked).

@@ -14,15 +14,15 @@ Names follow the Pebble HF field reference: **Tuning Knob** (turn / press), **Me
 In the picker the radio shows the keys on the top line and the slot on the bottom:
 
 ```
-SEL=go KNOB=save
+KNOB=go SEL=save
 A1 14.0300 CW
 ```
 
 | In the picker | What happens |
 |---|---|
 | Turn the **Tuning Knob** | Step through slots 1–8. Nothing is tuned yet, so the VFO keeps its frequency. |
-| Short press **Select** | Tune the **active** VFO to the slot (frequency and mode, with the usual CW/SSB filter and step) and leave the picker. Does nothing on an empty slot. |
-| Short press **Tuning Knob** | Store the active VFO's current frequency and mode in the slot shown. `Saved to 6` appears for a moment, then the slot is shown again. |
+| Short press **Tuning Knob** | Go: tune the **active** VFO to the slot (frequency and mode, with the usual CW/SSB filter and step) and leave the picker. Does nothing on an empty slot. |
+| Short press **Select** | Store the active VFO's current frequency and mode in the slot shown. `Saved to 6` appears for a moment, then the slot is shown again. Careful: Select also opens the picker, so a quick second press right after opening stores into slot 1. |
 | Short press **Menu** | Leave the picker without changing anything. |
 
 The picker never asks for VFO A or B: it works on whichever one is active, and the letter at the start of the bottom line (`A1`, `B6`) shows which. To set both VFOs, do it once, double-click the Tuning Knob, and do it again.
