@@ -4127,7 +4127,10 @@ void wspr_status(const __FlashStringHelper* s){
 
 void wspr_line2(){  // second line while the beacon is on: the message being sent, e.g. "N0ASL EN01 27dBm" ("dB" for a 6-character call, which leaves no room for the m)
   lcd.noCursor(); lcd.setCursor(0, 1);
-  lcd.print(wspr_call); lcd.print(' '); lcd.print(wspr_grid); lcd.print(' '); lcd.print(wspr_dbm[wspr_pwr]); lcd.print(wspr_call[5] ? F("dB") : F("dBm")); lcd_blanks();
+  uint8_t n = 0;  // call without trailing blanks (the editor can leave a blank in the 6th position)
+  for(uint8_t i = 0; wspr_call[i] && (i != 6); i++) if(wspr_call[i] != ' ') n = i + 1;
+  for(uint8_t i = 0; i != n; i++) lcd.print(wspr_call[i]);
+  lcd.print(' '); lcd.print(wspr_grid); lcd.print(' '); lcd.print(wspr_dbm[wspr_pwr]); lcd.print((n == 6) ? F("dB") : F("dBm")); lcd_blanks();
 }
 
 void wspr_top(const __FlashStringHelper* s){  // first line: state text, then the TX percentage at the right
