@@ -1,6 +1,6 @@
 # Fork notes: building the firmware
 
-`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. In the `wspr-beacon` branch `WSPR_BEACON` is on and `DIAG` is off by default; commenting out `WSPR_BEACON` and `VERSION_TAG` and restoring `DIAG` gives the official build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up. A default build is the official firmware.
+`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. In the `wspr-beacon` branch `WSPR_BEACON` is on and `DIAG` is off by default; commenting out `WSPR_BEACON`, `FREQ_PRESETS` and `VERSION_TAG` and restoring `DIAG` gives the official build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up. A default build is the official firmware.
 
 ## Building
 
@@ -30,7 +30,9 @@ Free flash in the official build: **≈5.4 KB**. The `wspr-beacon` branch turns 
 | Switch | Adds | Flash | RAM left for stack |
 |---|---|---|---|
 | `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.1–5.5 ([docs](wspr-beacon.md)) | +3,824 (30,718 total) | 847 |
-| `WSPR_BEACON`, `DIAG` off (branch default) | as above, without the startup self-test | 29,402 total | 847 |
+| `WSPR_BEACON`, `DIAG` off | as above, without the startup self-test | 29,402 total | 847 |
+| `FREQ_PRESETS` | 5 frequency presets, menu 1.14/1.15 ([docs](presets.md)) | +858 | 845 (with the beacon) |
+| branch default: beacon, presets, `DIAG` off | | 30,260 total (94%) | 845 |
 
 With this fork's switches off and `DIAG` on, the build is byte-identical to the official firmware.
 
