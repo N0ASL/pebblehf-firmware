@@ -60,3 +60,4 @@ TP9/TP11 are biased mid-rail by 10k/10k dividers. Useful for checking the receiv
 - USB-C (J5) is power only (5.1 kΩ CC resistors, no data lines used); about 1 W output on 5 V.
 - Audio: HEADPHONE jack J6, MIC/PTT/KEYER jack J2 (tip = DIT/PTT, ring = DAH).
 - 26 MHz TCXO on the Si5351; 20 MHz crystal on the AVR.
+- Buttons (V2.5 schematic): Menu (SW1) and Select (SW2) feed ADC pin PC3 from +5 V through 3.3 k and 1 k, the Tuning Knob button (SW3) goes straight to +5 V, and R9 (10 k) pulls PC3 to ground. Single presses read 3.76 V (Menu), 4.55 V (Select) and 5 V (knob); Menu + Select reads about 4.64 V, and any chord with the knob reads as the knob. The firmware picks the button at the start of a press (thresholds 4.2 V and 4.8 V), so chords cannot be used; see [presets.md](presets.md).

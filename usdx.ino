@@ -4372,9 +4372,58 @@ void show_banner(){
 const char* vfosel_label[] = { "A", "B"/*, "Split"*/ };
 const char* mode_label[5] = { "LSB", "USB", "CW ", "FM ", "AM " };
 
+// --- FREQ_PRESETS_BEGIN (host-tested: test/preset_test.py extracts this block) ---
+#ifdef FREQ_PRESETS
+// Frequency presets: 8 slots of 4 bytes (24-bit frequency in Hz, mode in the top byte) in their own EEPROM area outside the parameter
+// list. A slot that was never stored, or is damaged, reads as its factory value (slots 6-8 have none: 0 = empty).
+#define N_PRESET 8
+#define PRESET_EEPROM 0x3D0  // 8 x 4 bytes (0x3D0-0x3EF)
+const uint32_t preset_default[N_PRESET] PROGMEM = {
+  14030000UL | ((uint32_t)CW << 24), 14060000UL | ((uint32_t)CW << 24), 14100000UL | ((uint32_t)CW << 24),
+  14250000UL | ((uint32_t)USB << 24), 14285000UL | ((uint32_t)USB << 24), 0, 0, 0 };
+uint8_t preset_sel = 0;   // slot shown in the picker (0-based)
+uint8_t preset_pick = 0;  // 1 while the picker is open (Select short press in the main screen)
+
+uint32_t preset_get(uint8_t i){  // 0 = empty slot
+  uint32_t v = eeprom_read_dword((const uint32_t *)(PRESET_EEPROM + 4 * i));
+  uint32_t f = v & 0xFFFFFFUL;
+  if((f < FREQ_LIMIT_LOW) || (f > FREQ_LIMIT_HIGH) || ((v >> 24) > CW)) v = pgm_read_dword(&preset_default[i]);
+  return v;
+}
+
+void preset_print(uint32_t v){  // "14.0300 CW " (frequency in MHz with 100 Hz resolution, then the 3-character mode label)
+  uint32_t f = v & 0xFFFFFFUL;
+  lcd.print(f / 1000000UL); lcd.print('.');
+  uint16_t r = (f % 1000000UL) / 100;
+  if(r < 1000) lcd.print('0'); if(r < 100) lcd.print('0'); if(r < 10) lcd.print('0');
+  lcd.print(r); lcd.print(' '); lcd.print(mode_label[v >> 24]);
+}
+
+void preset_draw(){  // top line: the keys; bottom line: active VFO, slot number and its content. Column 15 is left to the T/R indicator.
+  lcd.noCursor();
+  lcd.setCursor(0, 0); lcd.print(F("SEL=go KNOB=save"));
+  lcd.setCursor(0, 1); lcd.print((vfosel % 2) ? 'B' : 'A'); lcd.print(preset_sel + 1); lcd.print(' ');  // "A1 14.0300 CW"
+  uint32_t v = preset_get(preset_sel);
+  uint8_t len = 3 + 11;
+  if(v){ preset_print(v); } else { lcd.print(F("empty")); len = 3 + 5; }
+  for(; len < 15; len++) lcd.print(' ');
+}
+
+void preset_store(){  // store the active VFO's frequency and mode in the shown slot
+  eeprom_write_dword((uint32_t *)(PRESET_EEPROM + 4 * preset_sel), (uint32_t)freq | ((uint32_t)mode << 24));
+  lcd.setCursor(0, 1); lcd.print(F("Saved to ")); lcd.print(preset_sel + 1); lcd.print(F("     "));
+  wdt_reset(); delay(800); wdt_reset();
+  preset_draw();
+}
+#endif //FREQ_PRESETS
+// --- FREQ_PRESETS_END ---
+
 inline void display_vfo(int32_t f){
 #ifdef WSPR_BEACON
   if(wspr_state){ wspr_line2(); return; }  // beacon on: show its message instead of the VFO
+#endif
+#ifdef FREQ_PRESETS
+  if(preset_pick){ preset_draw(); return; }  // preset picker open
 #endif
   lcd.setCursor(0, 1);
   lcd.print((rit) ? ' ' : ((vfosel%2)|((vfosel==SPLIT) & tx)) ? '\x07' : '\x06');  // RIT, VFO A/B
@@ -4584,54 +4633,17 @@ const char* agc_label[] = { "OFF", "Fast", "Slow" };
 
 #define _N(a) sizeof(a)/sizeof(a[0])
 
-// --- FREQ_PRESETS_BEGIN (host-tested: test/preset_test.py extracts this block) ---
-#ifdef FREQ_PRESETS
-// Presets: 20m frequency (low 24 bits) and mode (top byte) in 4 bytes each, kept in their own EEPROM area outside the parameter list.
-// An erased or damaged slot reads as the default below, so nothing needs initialising.
-#define N_PRESET 5
-#define PRESET_EEPROM 0x3D0  // 5 x 4 bytes (0x3D0-0x3E3)
-const uint32_t preset_default[N_PRESET] PROGMEM = {
-  14030000UL | ((uint32_t)CW << 24), 14060000UL | ((uint32_t)CW << 24), 14100000UL | ((uint32_t)CW << 24),
-  14250000UL | ((uint32_t)USB << 24), 14285000UL | ((uint32_t)USB << 24) };
-uint8_t preset_sel = 0;   // slot shown by menu 1.14 (0-based)
-uint8_t preset_save = 0;  // menu 1.15: 0 = off, 1..N_PRESET = store the current frequency and mode in that slot when leaving the item
-
-uint32_t preset_get(uint8_t i){
-  uint32_t v = eeprom_read_dword((const uint32_t *)(PRESET_EEPROM + 4 * i));
-  uint32_t f = v & 0xFFFFFFUL;
-  if((f < FREQ_LIMIT_LOW) || (f > FREQ_LIMIT_HIGH) || ((v >> 24) > CW)) v = pgm_read_dword(&preset_default[i]);
-  return v;
-}
-
-void preset_print(uint32_t v){  // "14.0300 CW" (frequency in MHz with 100 Hz resolution, then the mode)
-  uint32_t f = v & 0xFFFFFFUL;
-  lcd.print(f / 1000000UL); lcd.print('.');
-  uint16_t r = (f % 1000000UL) / 100;
-  if(r < 1000) lcd.print('0'); if(r < 100) lcd.print('0'); if(r < 10) lcd.print('0');
-  lcd.print(r); lcd.print(' '); lcd.print(mode_label[v >> 24]);
-}
-#endif //FREQ_PRESETS
-// --- FREQ_PRESETS_END ---
 
 #ifdef WSPR_BEACON
 #define N_PARAMS_WSPR 5
 #else
 #define N_PARAMS_WSPR 0
 #endif
-#ifdef FREQ_PRESETS
-#define N_PARAMS_PRESET 2
-#else
-#define N_PARAMS_PRESET 0
-#endif
-#define N_PARAMS (45 + N_PARAMS_WSPR + N_PARAMS_PRESET)  // number of (visible) parameters
+#define N_PARAMS (45 + N_PARAMS_WSPR)  // number of (visible) parameters
 
 #define N_ALL_PARAMS (N_PARAMS+5)  // number of parameters
 
-enum params_t {_NULL, VOLUME, MODE, FILTER, BAND, STEP, VFOSEL, RIT, AGC, NR, ATT, ATT2, SMETER, SWRMETER,
-#ifdef FREQ_PRESETS
-  PRESET, PRESET_SAVE,
-#endif
-  CWDEC, CWTONE, SIDETONE_VOL, CWOFF, SEMIQSK, KEY_WPM, KEY_MODE, KEY_PIN, KEY_TX, VOX, VOXGAIN, DRIVE, TXDELAY, MOX, CWINTERVAL, CWMSG1, CWMSG2, CWMSG3, CWMSG4, CWMSG5, CWMSG6,
+enum params_t {_NULL, VOLUME, MODE, FILTER, BAND, STEP, VFOSEL, RIT, AGC, NR, ATT, ATT2, SMETER, SWRMETER, CWDEC, CWTONE, SIDETONE_VOL, CWOFF, SEMIQSK, KEY_WPM, KEY_MODE, KEY_PIN, KEY_TX, VOX, VOXGAIN, DRIVE, TXDELAY, MOX, CWINTERVAL, CWMSG1, CWMSG2, CWMSG3, CWMSG4, CWMSG5, CWMSG6,
 #ifdef WSPR_BEACON
   WSPR_CALL, WSPR_GRID, WSPR_PWR, WSPR_PCT, WSPR_RUN,
 #endif
@@ -4667,26 +4679,6 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
 #ifdef SWR_METER
     case SWRMETER:  paramAction(action, swrmeter, 0x1D, F("SWR Meter"), swr_label, 0, _N(swr_label) - 1, false); break;
 #endif
-#ifdef FREQ_PRESETS
-    case PRESET:  if((action == UPDATE) || (action == UPDATE_MENU)){  // the tuning itself is done where the menu values are applied (loop)
-                    preset_sel = ((int16_t)preset_sel + encoder_val + 10 * N_PRESET) % N_PRESET; encoder_val = 0;
-                    printlabel(action, 0x1E, F("Preset"));
-                    lcd.print(preset_sel + 1); lcd.print(' '); preset_print(preset_get(preset_sel)); lcd_blanks(); } break;
-    case PRESET_SAVE:
-                  if((action == UPDATE) || (action == UPDATE_MENU)){
-                    int16_t n = (int16_t)preset_save + encoder_val; encoder_val = 0;
-                    preset_save = (n < 0) ? 0 : (n > N_PRESET) ? N_PRESET : n;
-                    printlabel(action, 0x1F, F("Preset Save"));
-                    if(preset_save){ lcd.print(preset_save); lcd.print(' '); preset_print(freq | ((uint32_t)mode << 24)); } else lcd.print(F("Off"));
-                    lcd_blanks();
-                  }
-                  if((action == SAVE) && preset_save){  // leaving the item with a slot chosen: store the current frequency and mode there
-                    eeprom_write_dword((uint32_t *)(PRESET_EEPROM + 4 * (preset_save - 1)), freq | ((uint32_t)mode << 24));
-                    lcd.setCursor(0, 1); lcd.print(F("Saved to ")); lcd.print(preset_save); lcd_blanks();
-                    preset_sel = preset_save - 1; preset_save = 0;
-                    wdt_reset(); delay(800); wdt_reset();
-                  } break;
-#endif //FREQ_PRESETS
 #ifdef CW_DECODER
     case CWDEC:   paramAction(action, cwdec, 0x21, F("CW Decoder"), offon_label, 0, 1, false); break;
 #endif
@@ -5643,10 +5635,16 @@ void loop()
 #endif  //CW_DECODER
 
 #ifdef WSPR_BEACON
-  if((menumode == 0) && (!wspr_state)){ // in main (top line is used by the beacon while it runs)
+#define WSPR_BUSY (wspr_state)
 #else
-  if(menumode == 0){ // in main
+#define WSPR_BUSY 0
 #endif
+#ifdef FREQ_PRESETS
+#define PICK_BUSY (preset_pick)
+#else
+#define PICK_BUSY 0
+#endif
+  if((menumode == 0) && !WSPR_BUSY && !PICK_BUSY){ // in main (the top line belongs to the beacon / the preset picker while they are active)
 #ifdef CW_DECODER
     if(cw_event){
       uint8_t offset = (uint8_t[]){ 0, 7, 3, 5, 3, 7, 8 }[smode]; // depending on smeter more/less cw-text
@@ -5798,6 +5796,23 @@ void loop()
       if((wspr_state == 1) && (event == (BR|SC))) wspr_sync(); else wspr_stop();
       event = 0;
     }
+#endif
+#ifdef FREQ_PRESETS
+    if(preset_pick){  // preset picker: Select = go, Tuning Knob press = store, Menu = cancel; everything else is ignored
+      if((event == (BR|SC)) && preset_get(preset_sel)){
+        uint32_t v = preset_get(preset_sel);
+        freq = v & 0xFFFFFFUL; mode = v >> 24;
+        vfomode[vfosel%2] = mode;
+        paramAction(SAVE, (vfosel%2) ? MODEB : MODEA);
+        if(mode != CW) stepsize = STEP_1k; else stepsize = STEP_500;
+        if(mode == CW){ filt = 4; nr = 0; } else filt = 0;
+        si5351.iqmsa = 0;  // enforce PLL reset
+        preset_pick = 0; show_banner(); change = true;
+      }
+      if(event == (BL|SC)){ preset_pick = 0; show_banner(); change = true; }
+      if(event == (BE|SC)) preset_store();
+      event = 0;
+    } else if((event == (BR|SC)) && (menumode == 0)){ preset_pick = 1; preset_draw(); event = 0; }  // Select short press in the main screen opens the picker
 #endif
     switch(event){
 #ifndef ONEBUTTON
@@ -5954,6 +5969,17 @@ void loop()
         //if(bandval >= (N_BANDS-1)) bandval = 1;  // excludes 6m, 160m
         //stepsize = STEP_1k;
         //change = true;
+#ifdef FREQ_PRESETS
+        if(!menumode){  // Tuning Knob double click: swap VFO A and B
+          vfosel = !vfosel;
+          freq = vfo[vfosel%2];
+          mode = vfomode[vfosel%2];
+          if(mode != CW) stepsize = STEP_1k; else stepsize = STEP_500;
+          if(mode == CW){ filt = 4; nr = 0; } else filt = 0;
+          paramAction(SAVE, VFOSEL);
+          change = true;
+        }
+#endif
         break;
       case BE|PL: stepsize_change(-1); break;
       case BE|PT:
@@ -6074,18 +6100,6 @@ void loop()
           change = true;
         }
         //if(menu == NR){ if(mode == CW) nr = false; }
-#ifdef FREQ_PRESETS
-        if(menu == PRESET){  // tune the current VFO to the preset (same steps as the Mode menu)
-          uint32_t v = preset_get(preset_sel);
-          freq = v & 0xFFFFFFUL; mode = v >> 24;
-          vfomode[vfosel%2] = mode;
-          paramAction(SAVE, (vfosel%2) ? MODEB : MODEA);
-          if(mode != CW) stepsize = STEP_1k; else stepsize = STEP_500;
-          if(mode == CW){ filt = 4; nr = 0; } else filt = 0;
-          si5351.iqmsa = 0;  // enforce PLL reset
-          change = true;
-        }
-#endif
         if(menu == VFOSEL){
           freq = vfo[vfosel%2];
           mode = vfomode[vfosel%2];
@@ -6178,6 +6192,12 @@ void loop()
   if(menumode == 0){
 #ifdef WSPR_BEACON
     if(wspr_state) encoder_val = 0;  // no tuning while the beacon is on
+#endif
+#ifdef FREQ_PRESETS
+    if(preset_pick && encoder_val){  // scroll the picker (no tuning until Select)
+      preset_sel = (((int16_t)preset_sel + encoder_val) % N_PRESET + N_PRESET) % N_PRESET; encoder_val = 0;
+      preset_draw();
+    }
 #endif
     if(encoder_val){  // process encoder tuning steps
       process_encoder_tuning_step(encoder_val);
