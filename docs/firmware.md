@@ -1,6 +1,22 @@
 # Fork notes: building the firmware
 
-`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. In the `wspr-beacon` branch `WSPR_BEACON` is on and `DIAG` is off by default; commenting out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP` and `VERSION_TAG` and restoring `DIAG` gives the official build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up. A default build is the official firmware.
+`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. In the `wspr-beacon` branch `WSPR_BEACON` is on and `DIAG` is off by default; commenting out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and restoring `DIAG` gives the official build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up. A default build is the official firmware.
+
+## Changes from the official 1.0.7 firmware
+
+WSPR beacon (`WSPR_BEACON`): stand-alone beacon on 14.097 MHz. Menu 5.0 WSPR Menu opens 5.1 Call, 5.2 Grid, 5.3 Power, 5.4 TX %, 5.5 Offset (-90 to +90 Hz or Random), 5.6 Max TX and 5.7 Beacon. Manual sync with SELECT on an even minute; the display shows only beacon data; any button or PTT stops it; beacon ON plus SELECT closes the menu; `WSPR done` after the last transmission. See [wspr-beacon.md](wspr-beacon.md).
+
+Presets (`FREQ_PRESETS`): 8 saved frequencies and modes, picker opened by SELECT or menu 1.14; double-click of the Tuning Knob swaps VFO A/B. See [presets.md](presets.md).
+
+TX Timeout (`TX_TIMEOUT`): menu 3.6, Off/1/2/3/5/10 minutes for manual key or PTT; the beacon is not affected.
+
+Menu scrolling (`MENU_WRAP`): the menu list wraps from the last item to the first and back.
+
+Other: `-N0ASL` version tag (`VERSION_TAG`), `DIAG` off by default, splash screen pause restored.
+
+EEPROM: presets 0x3D0-0x3EF; WSPR settings 0x3F0-0x3FD and TX timeout 0x3FE. Existing settings and calibration do not move, so they survive flashing.
+
+Size of the default build: 31,758 bytes of flash (98 %), 1,219 bytes RAM, 829 bytes left for the stack.
 
 ## Building
 
@@ -34,7 +50,7 @@ Free flash in the official build: **≈5.4 KB**. The `wspr-beacon` branch turns 
 | `MENU_WRAP` | the menu scrolls round (past the last item comes the first, and the other way) | about +20 | 833 |
 | `FREQ_PRESETS` | 8 frequency presets, menu 1.14 Presets,, Select opens the picker, Tuning Knob goes, Select stores; Tuning Knob double click swaps A/B ([docs](presets.md)) | +1,142 | 833 (with the beacon) |
 | `TX_TIMEOUT` | menu 3.6 TX Timeout (Off/1/2/3/5/10 min) for manual key/PTT transmit; the beacon is not affected | about +300 with the beacon menu changes | 829 |
-| branch default: beacon, presets, TX timeout, `DIAG` off | | 31,718 total (98%) | 829 |
+| branch default: beacon, presets, TX timeout, `DIAG` off | | 31,758 total (98%) | 829 |
 
 Compiler flags: the Arduino AVR core already builds with `-Os`, LTO and section garbage collection. `-mcall-prologues` would save about 560 bytes but slows every function entry and exit, which is risky for the sample-rate-critical receive/transmit code, so it is not used.
 

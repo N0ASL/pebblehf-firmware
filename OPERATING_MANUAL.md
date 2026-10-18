@@ -94,9 +94,19 @@ Press the MENU (left) button to enter the menu. Turn the encoder to scroll throu
 | 2.6 | Keyer Mode | Iambic A, Iambic B, Straight | Type of CW keyer |
 | 2.7 | Keyer Swap | OFF, ON | Swap DIT/DAH paddle inputs |
 | 2.8 | Practice | OFF, ON | Disables transmit for CW practice |
+| 1.14 | Presets | (click to open) | Fork: opens the frequency preset picker |
 | 3.1 | VOX | OFF, ON | Voice-operated transmit |
 | 3.2 | Noise Gate | 0–255 | Audio threshold for VOX and SSB TX |
 | 3.3 | TX Drive | 0–8 | Transmit audio gain (6 dB steps) |
+| 3.6 | TX Timeout | Off, 1, 2, 3, 5, 10 min | Fork: cuts a key or PTT held too long (not the WSPR beacon) |
+| 5.0 | WSPR Menu | (click to open) | Fork: opens 5.1-5.7 below |
+| 5.1 | WSPR Call | up to 6 characters | Standard callsign sent by the beacon |
+| 5.2 | WSPR Grid | 4 characters | Two letters A-R then two digits |
+| 5.3 | WSPR Power | 20, 23, 27, 30, 33, 37 dBm | Power value sent in the message |
+| 5.4 | WSPR TX % | 5, 10, 25, 50 % | Share of 2-minute slots used for transmitting |
+| 5.5 | WSPR Offset | -90 to +90 Hz, Random | Shifts the signal within the WSPR window |
+| 5.6 | WSPR Max TX | No limit, 1, 2, 3, 5, 10 | Beacon stops after this many transmissions |
+| 5.7 | WSPR Beacon | OFF, ON | Starts the beacon; not stored |
 | 8.1 | PA Bias min | 0–255 | PA PWM level for 0% RF output |
 | 8.2 | PA Bias max | 0–255 | PA PWM level for 100% RF output |
 | 8.3 | Ref freq | 14000000–28000000 | SI5351 crystal frequency calibration |
@@ -372,6 +382,14 @@ Adjusts the I/Q phase offset for the SDR receiver in degrees. This calibration p
 
 Displays the firmware version number and compile date. Useful for verifying which firmware is installed on your radio.
 
+### 3.6 TX Timeout (this fork)
+
+**Values:** Off (default), 1, 2, 3, 5, 10 minutes. A key or PTT held longer than the setting is cut and the display shows `TX timeout` until it is released. The WSPR beacon is not affected.
+
+### 5.0 WSPR Menu and 5.1-5.7 (this fork)
+
+5.0 is one entry that opens the WSPR list: click it and 5.1 to 5.7 scroll round. SELECT goes back to the main list. Setting 5.7 WSPR Beacon to ON and pressing SELECT closes the menu; click SELECT at the start of an even minute to sync, and the first transmission starts 1 s later. Offset moves the signal by a fixed amount or randomly for each transmission; Max TX ends the run with `WSPR done`. Details: [docs/wspr-beacon.md](docs/wspr-beacon.md).
+
 ---
 
 ## Button Quick Reference
@@ -383,6 +401,8 @@ Displays the firmware version number and compile date. Useful for verifying whic
 | Change tuning step (up) | Short press encoder | Main screen |
 | Change tuning step (down) | Long press encoder | Main screen |
 | Cycle filter bandwidth | Double-click SELECT (right) | Main screen |
+| Open preset picker (fork) | Short press SELECT (right) | Main screen |
+| Swap VFO A/B (fork) | Double-click encoder | Main screen |
 | Toggle RIT / Swap VFO | Long press SELECT (right) | Main screen |
 | Enter menu | Short press MENU (left) | Main screen |
 | Quick menu access | Hold MENU (left) + turn encoder | Main screen |
