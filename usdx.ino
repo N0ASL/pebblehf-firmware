@@ -4205,7 +4205,7 @@ void wspr_poll(){  // called from loop()
     do wspr_plan(); while((int32_t)(millis() - wspr_next) >= 0);  // next chosen slot in the future
     wspr_shown = 0xffff;
   }
-  uint16_t s = (wspr_next - millis()) / (F_MCU / 16000) / 1000 + 1;  // seconds until the next transmission
+  uint16_t s = (wspr_next - millis()) / (F_MCU / 16000) + 1;  // seconds until the next transmission (millis() runs F_MCU/16 MHz times fast: 1250 per second at 20 MHz)
   if(s != wspr_shown){
     wspr_shown = s;
     wspr_status((s >= 6000) ? F("WSPR TX ") : F("WSPR TX in "));  // "WSPR TX in 2:59"; the "in" is dropped from 100 minutes on so the time still fits

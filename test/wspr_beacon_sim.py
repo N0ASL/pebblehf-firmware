@@ -32,8 +32,17 @@ void wdt_reset(){ now++; }
 #define DIT 13
 uint8_t inv = 0;
 int digitalRead(int p){ if(p == BUTTONS) return btn(); return 1; }
-struct { void noCursor(){} void setCursor(int,int){} void print(const char*){} void print(long){} void print(int){} void print(unsigned){} void print(char){} } lcd;
-void lcd_blanks(){}
+#include <string>
+struct Lcd { char scr[2][17]; int r = 0, c = 0;
+  Lcd(){ memset(scr, ' ', sizeof(scr)); scr[0][16] = scr[1][16] = 0; }
+  void noCursor(){}
+  void setCursor(int cc, int rr){ c = cc; r = rr; }
+  void put(char ch){ if(c < 16) scr[r][c] = ch; c++; }
+  void print(const char* t){ for(; *t; t++) put(*t); }
+  void print(long v){ print(std::to_string(v).c_str()); }
+  void print(int v){ print((long)v); } void print(unsigned v){ print((long)v); } void print(unsigned long v){ print((long)v); }
+  void print(char ch){ put(ch); } } lcd;
+void lcd_blanks(){ lcd.print("        "); }
 void show_banner(){}
 void stepsize_showcursor(){}
 volatile uint8_t menumode = 0, mode = USB, change = 0;
@@ -53,7 +62,17 @@ int main(){
   printf("state after switching on: %d\n", wspr_state);
   now = 500000; wspr_press = now; wspr_sync();
   uint32_t t_sync = now;
-  for(int i = 0; i < 1600000; i++){ wspr_poll(); now++; }    // ~21 min of loop time
+  int samples = 0, badshow = 0, first_bad = 0;
+  for(int i = 0; i < 1600000; i++){
+    wspr_poll(); now++;
+    if((i % 6250) == 0 && wspr_state == 2 && (int32_t)(wspr_next - now) > 1250){  // every 5 s of real time, between transmissions
+      int m = 0, sec = 0; char *p = strstr(lcd.scr[0], "TX ");
+      if(p){ p += 3; if(!strncmp(p, "in ", 3)) p += 3; if(sscanf(p, "%d:%d", &m, &sec) != 2) m = -1; } else m = -1;
+      double real = (int32_t)(wspr_next - now) / 1250.0;     // real seconds left, 1250 millis() units per second
+      samples++; if(m < 0 || m * 60 + sec < real - 1.5 || m * 60 + sec > real + 1.5){ badshow++; if(!first_bad){ first_bad = 1; printf("BAD SHOW: '%s' real left %.1f\n", lcd.scr[0], real); } }
+    }
+  }
+  printf("countdown display samples: %d, wrong: %d\n", samples, badshow);
   // analyse
   std::vector<uint32_t> keyon, keyoff; std::vector<Ev> tones;
   for(auto &e: ev){ if(e.k=='K'){ (e.v? keyon: keyoff).push_back(e.t); } if(e.k=='T') tones.push_back(e); }
@@ -103,6 +122,7 @@ def main():
             "TX 0: key-down 1.000 s after sync, key-up after 110.592 s on air",
             "TX 1: key-down 241.000 s after sync, key-up after 110.592 s on air",
             "TX 2: key-down 481.000 s after sync, key-up after 110.592 s on air",
+            "countdown display samples: 253, wrong: 0",
             "tone writes per TX: 162, first-TX symbol timing late by at most 0.0000 s, errors 0",
             "abort 30 s into TX: state 0, key-down 1, key-up 1",
             "TX 5%: measured 5.0%, shortest gap 2 slots", "TX 10%: measured 10.0%, shortest gap 2 slots",
