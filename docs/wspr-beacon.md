@@ -1,6 +1,6 @@
 # WSPR beacon (`WSPR_BEACON`)
 
-Status (17 Oct 2026): **decoded on the air (WSJT-X); the WSPR menu, offset, max TX and TX timeout have all been tried on the radio; 5.7 as a click-to-start item is new and not yet tried.**
+Status (17 Oct 2026): **decoded on the air (WSJT-X); the WSPR menu, offset, max TX, TX timeout and click-to-start 5.7 have all been tried on the radio.**
 
 A stand-alone WSPR beacon inside the Pebble HF firmware: no Pico, phone or computer attached. It sends a standard WSPR message (callsign, 4-character grid, power) on one fixed frequency in the 20 m WSPR window.
 
