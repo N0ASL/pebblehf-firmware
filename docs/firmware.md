@@ -29,15 +29,18 @@ Free flash in the official build: **≈5.4 KB**. The `wspr-beacon` branch turns 
 
 | Switch | Adds | Flash | RAM left for stack |
 |---|---|---|---|
-| `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.1–5.5 ([docs](wspr-beacon.md)) | +3,824 (30,718 total) | 847 |
+| `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.0 WSPR Menu with items 5.1–5.7 ([docs](wspr-beacon.md)) | +3,824 (30,718 total) | 847 |
 | `WSPR_BEACON`, `DIAG` off | as above, without the startup self-test | 29,402 total | 847 |
 | `MENU_WRAP` | the menu scrolls round (past the last item comes the first, and the other way) | about +20 | 833 |
 | `FREQ_PRESETS` | 8 frequency presets, menu 1.14 Presets,, Select opens the picker, Tuning Knob goes, Select stores; Tuning Knob double click swaps A/B ([docs](presets.md)) | +1,142 | 833 (with the beacon) |
-| branch default: beacon, presets, `DIAG` off | | 30,630 total (94%) | 833 |
+| `TX_TIMEOUT` | menu 3.6 TX Timeout (Off/1/2/3/5/10 min) for manual key/PTT transmit; the beacon is not affected | about +300 with the beacon menu changes | 829 |
+| branch default: beacon, presets, TX timeout, `DIAG` off | | 31,718 total (98%) | 829 |
 
-With this fork's switches off and `DIAG` on, the build is byte-identical to the official firmware.
+Compiler flags: the Arduino AVR core already builds with `-Os`, LTO and section garbage collection. `-mcall-prologues` would save about 560 bytes but slows every function entry and exit, which is risky for the sample-rate-critical receive/transmit code, so it is not used.
 
-Host tests: `python3 test/wspr_encoder_test.py`, `python3 test/wspr_beacon_sim.py` (need a C++ compiler).
+With this fork's switches off (`WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `VERSION_TAG`, `TX_TIMEOUT`) and `DIAG` on, the build is byte-identical to the official firmware.
+
+Host tests: `python3 test/wspr_encoder_test.py`, `python3 test/wspr_beacon_sim.py`, `python3 test/menu_nav_test.py` (need a C++ compiler).
 
 ### Built-in optional switches (already in the source, off in the Pebble HF build)
 

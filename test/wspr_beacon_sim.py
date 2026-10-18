@@ -28,6 +28,8 @@ uint32_t millis(){ return now; }
 static int stop_at = -1;               // simulated button press at this time
 static int btn(){ return stop_at >= 0 && (int)now >= stop_at; }
 void wdt_reset(){ now++; }
+void delay(unsigned long ms){ now += ms * 1250UL / 1000; }
+inline uint8_t opt_n(uint8_t i){ return (i < 4) ? i : (i == 4) ? 5 : 10; }
 #define BUTTONS 17
 #define DIT 13
 uint8_t inv = 0;
@@ -103,6 +105,21 @@ int main(){
     for(uint32_t i = 0; i < n; i++){ uint32_t a = wspr_next; wspr_plan(); uint32_t g = (wspr_next - a) / 150000; slots += g; if(g < mingap) mingap = g; }
     printf("TX %d%%: measured %.1f%%, shortest gap %u slots\n", wspr_pctv[p], 100.0 * n / slots, mingap);
   }
+  // offset: fixed +50 Hz, then random per transmission
+  strcpy(wspr_call, "N0ASL"); wspr_pct = 3; stop_at = -1;
+  for(int pass = 0; pass < 2; pass++){
+    wspr_off = pass ? 19 : 14; wspr_max = 0; ev.clear(); now = 9000000; wspr_on = 1; wspr_state = 0; wspr_poll(); wspr_press = now; wspr_sync();
+    for(int i = 0; i < 5000000 && ev.size() < 100000; i++){ wspr_poll(); now++; if(i > 4800000) break; }
+    std::vector<long> fs; for(auto &e: ev) if(e.k=='F') fs.push_back(e.v - (long)WSPR_FREQ - (long)cw_offset);
+    long lo = 999, hi = -999; int bad10 = 0; for(long f: fs){ if(f < lo) lo = f; if(f > hi) hi = f; if(f % 10) bad10++; }
+    printf("offset %s: %zu carriers, min %ld max %ld, not multiple of 10: %d\n", pass ? "random" : "+50", fs.size(), lo, hi, bad10);
+    wspr_on = 0; wspr_state = 0;
+  }
+  // max TX: stop after 2 transmissions and say so
+  wspr_off = 9; wspr_max = 2; ev.clear(); now = 20000000; wspr_on = 1; wspr_state = 0; wspr_poll(); wspr_press = now; wspr_sync();
+  for(int i = 0; i < 2000000 && wspr_state; i++){ wspr_poll(); now++; }
+  int k_on = 0; for(auto &e: ev) if(e.k=='K' && e.v) k_on++;
+  printf("max TX 2: transmissions %d, state %d, on %d, line1 '%s'\n", k_on, wspr_state, wspr_on, lcd.scr[0]);
   // bad inputs
   stop_at = -1; strcpy(wspr_call, "ABCDEF"); wspr_on = 1; wspr_state = 0; wspr_poll(); printf("bad call -> on %d state %d\n", wspr_on, wspr_state);
   return 0;
@@ -132,7 +149,8 @@ def main():
             "tone writes per TX: 162, first-TX symbol timing late by at most 0.0000 s, errors 0",
             "abort 30 s into TX: state 0, key-down 1, key-up 1",
             "TX 5%: measured 5.0%, shortest gap 2 slots", "TX 10%: measured 10.0%, shortest gap 2 slots",
-            "TX 25%: measured 25.0%, shortest gap 2 slots", "TX 50%: measured 50.0%, shortest gap 2 slots", "bad call -> on 0 state 0"]
+            "TX 25%: measured 25.0%, shortest gap 2 slots", "TX 50%: measured 50.0%, shortest gap 2 slots", "bad call -> on 0 state 0",
+            "offset +50: ", "min 50 max 50, not multiple of 10: 0", "offset random: ", "not multiple of 10: 0", "max TX 2: transmissions 2, state 0, on 0"]
     missing = [w for w in want if w not in out]
     for w in missing:
         print("FAIL: expected:", w)

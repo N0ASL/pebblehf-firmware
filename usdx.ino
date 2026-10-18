@@ -54,6 +54,7 @@
 //#define CW_FREQS_FISTS 1   // Defaults to CW FISTS frequencies when changing bands
 //#define CW_MESSAGE       1   // Transmits pre-defined CW messages on-demand (left-click menu item 4.2)
 //#define CW_MESSAGE_EXT 1   // Additional CW messages
+#define TX_TIMEOUT     1   // Menu 3.6 TX Timeout: Off/1/2/3/5/10 min; stops a key or PTT that is held too long (not the WSPR beacon)
 #define MENU_WRAP      1   // Menu scrolls round: past the last item comes the first and the other way
 #define FREQ_PRESETS   1   // Frequency presets (menu 1.14 Preset, 1.15 Preset Save): step through saved 20m frequencies/modes, store the current one
 #define WSPR_BEACON    1   // Stand-alone WSPR beacon (menu 5.1-5.5): callsign, grid, power, TX %; sync by clicking SELECT (right button) on an even minute
@@ -4034,6 +4035,14 @@ void switch_rxtx(uint8_t tx_enable){
 
 uint8_t rx_ph_q = 90;
 
+#if defined(WSPR_BEACON) || defined(TX_TIMEOUT)
+#define OWN_EEPROM 0x3F0   // own EEPROM area (0x3F0-0x3FF), outside the parameter list, so other settings keep their addresses
+inline uint8_t opt_n(uint8_t i){ return (i < 4) ? i : (i == 4) ? 5 : 10; }  // option index 0..5 -> 0, 1, 2, 3, 5, 10 (minutes / transmissions)
+#endif
+#ifdef TX_TIMEOUT
+uint8_t txto = 0;  // index into opt_n(): 0 = off
+#endif
+
 #ifdef WSPR_BEACON
 // --- WSPR_ENCODER_BEGIN (host-tested: test/wspr_encoder_test.py extracts this block) ---
 // Standard (type 1) WSPR message: callsign up to 6 characters, 4-character grid, power in dBm.
@@ -4103,7 +4112,7 @@ inline uint8_t wspr_symbol(uint8_t k){  // channel symbol 0..3
 // milliseconds are converted with WSPR_U(). All schedule times are millis() values; compare them by signed difference.
 #define WSPR_U(ms)  ((uint32_t)(ms) * (F_MCU / 16000) / 1000)    // real ms -> millis() units (ms <= 3.4e6 for F_MCU 20M)
 #define WSPR_FREQ   14097098UL  // tone 0 in Hz; the four tones span 14 097 098-14 097 102.4 Hz, centred in the 14.0970-14.0972 MHz WSPR window
-#define WSPR_EEPROM 0x3F0       // own EEPROM area (12 bytes), outside the parameter list, so other settings keep their addresses
+#define WSPR_EEPROM OWN_EEPROM  // WSPR settings: 12 bytes, then offset, max TX (0x3FC, 0x3FD); 0x3FE is the TX timeout
 
 char wspr_call[7] = "";
 char wspr_grid[5] = "";
@@ -4115,6 +4124,10 @@ uint32_t wspr_press;           // millis() when the last button press started
 uint32_t wspr_next;            // millis() of the next transmission start
 uint16_t wspr_shown;           // last countdown shown
 uint16_t wspr_rnd = 0xACE1;    // xorshift state, mixed with the sync press time
+uint8_t wspr_off = 9;          // frequency offset index: 0..18 = -90..+90 Hz in 10 Hz steps (9 = 0 Hz), 19 = random for each transmission
+uint8_t wspr_max = 0;          // stop after this many transmissions: index into opt_n(), 0 = no limit
+uint8_t wspr_sent = 0;         // transmissions completed since the sync
+uint8_t wspr_sub = 0;          // 1 while the WSPR menu (5.1-5.7) is open
 const uint8_t wspr_dbm[] = { 20, 23, 27, 30, 33, 37 };
 const char* wspr_pwr_label[] = { "20dBm 0.1W", "23dBm 0.2W", "27dBm 0.5W", "30dBm 1W", "33dBm 2W", "37dBm 5W" };
 // TX percentage as in WSJT-X, with the 2-minute slots picked at random. A transmission is always followed by at least one
@@ -4142,12 +4155,13 @@ void wspr_top(const __FlashStringHelper* s){  // first line: state text, then th
   lcd.setCursor((wspr_pctv[wspr_pct] < 10) ? 14 : 13, 0); lcd.print(wspr_pctv[wspr_pct]); lcd.print('%');
 }
 
+uint16_t wspr_rand(){ wspr_rnd ^= wspr_rnd << 7; wspr_rnd ^= wspr_rnd >> 9; wspr_rnd ^= wspr_rnd << 8; return wspr_rnd; }
+
 void wspr_plan(){  // wspr_next is the slot just used (or the sync slot): move it to the next slot chosen for transmitting
   wspr_next += WSPR_U(120000);  // the slot after a transmission is always idle
   do {
     wspr_next += WSPR_U(120000);
-    wspr_rnd ^= wspr_rnd << 7; wspr_rnd ^= wspr_rnd >> 9; wspr_rnd ^= wspr_rnd << 8;
-  } while(wspr_rnd > wspr_thr[wspr_pct]);
+  } while(wspr_rand() > wspr_thr[wspr_pct]);
 }
 
 void wspr_stop(){
@@ -4160,6 +4174,7 @@ void wspr_stop(){
 void wspr_sync(){  // the press that started at wspr_press marks the start of an even minute
   wspr_next = wspr_press + WSPR_U(1000);  // first transmission starts 1 s into that minute (the first slot is always used)
   wspr_rnd ^= (uint16_t)wspr_press; if(!wspr_rnd) wspr_rnd = 1;
+  wspr_sent = 0;
   wspr_shown = 0xffff;
   wspr_state = 2;
 }
@@ -4169,7 +4184,8 @@ uint8_t wspr_tx(){  // one 110.6 s transmission; returns 1 when stopped by a but
   uint8_t stop = 0, shown = 0;
   mode = CW;  // constant carrier; switch_rxtx() then keys at (PLL frequency - cw_offset)
   wspr_top(F("WSPR TX"));
-  si5351.freq(WSPR_FREQ + cw_offset, rx_ph_q, 0);  // same PLL set-up as CW receive, so that TX lands on WSPR_FREQ
+  int16_t off = (wspr_off == 19) ? (int16_t)(wspr_rand() % 19 - 9) * 10 : ((int16_t)wspr_off - 9) * 10;  // Hz: fixed, or random in -90..+90 for each transmission
+  si5351.freq(WSPR_FREQ + off + cw_offset, rx_ph_q, 0);  // same PLL set-up as CW receive, so that TX lands on WSPR_FREQ (+ offset)
   uint32_t t0 = millis();
   switch_rxtx(1);
   for(uint8_t k = 0; (k != 162) && !stop; k++){
@@ -4205,6 +4221,8 @@ void wspr_poll(){  // called from loop()
   if((int32_t)(millis() - wspr_next) >= 0){
     if((int32_t)(millis() - wspr_next) < (int32_t)WSPR_U(1000)){  // on time (not more than 1 s late)
       if(wspr_tx()){ wspr_stop(); return; }
+      wspr_sent++;
+      if(wspr_max && (wspr_sent >= opt_n(wspr_max))){ wspr_status(F("WSPR done")); wdt_reset(); delay(2000); wdt_reset(); wspr_stop(); return; }  // the set number of transmissions is complete
     }
     do wspr_plan(); while((int32_t)(millis() - wspr_next) >= 0);  // next chosen slot in the future
     wspr_shown = 0xffff;
@@ -4514,6 +4532,23 @@ void actionCommon(uint8_t action, uint8_t *ptr, uint8_t size){
   eeprom_addr += size;
 }
 
+#if defined(WSPR_BEACON) || defined(TX_TIMEOUT)
+// A one-byte setting kept in the own EEPROM area (address addr), moved by the encoder between lo and hi. Returns 1 when the caller should print
+// the value text (the menu label has been printed); for load/save/skip it does the EEPROM access and returns 0.
+uint8_t byte_param(uint8_t action, uint8_t& v, uint8_t lo, uint8_t hi, int addr, uint8_t menuid, const __FlashStringHelper* label){
+  if((action == UPDATE) || (action == UPDATE_MENU)){
+    int16_t n = (int16_t)v + encoder_val; encoder_val = 0;
+    v = (n < lo) ? lo : (n > hi) ? hi : n;
+    printlabel(action, menuid, label);
+    return 1;
+  }
+  int _addr = eeprom_addr; eeprom_addr = addr;
+  actionCommon(action, &v, 1);
+  eeprom_addr = _addr;
+  return 0;
+}
+#endif
+
 template<typename T> void paramAction(uint8_t action, volatile T& value, uint8_t menuid, const __FlashStringHelper* label, const char* enumArray[], int32_t _min, int32_t _max, bool continuous){
   switch(action){
     case UPDATE:
@@ -4642,7 +4677,7 @@ const char* agc_label[] = { "OFF", "Fast", "Slow" };
 
 
 #ifdef WSPR_BEACON
-#define N_PARAMS_WSPR 5
+#define N_PARAMS_WSPR 8
 #else
 #define N_PARAMS_WSPR 0
 #endif
@@ -4651,7 +4686,12 @@ const char* agc_label[] = { "OFF", "Fast", "Slow" };
 #else
 #define N_PARAMS_PRESET 0
 #endif
-#define N_PARAMS (45 + N_PARAMS_WSPR + N_PARAMS_PRESET)  // number of (visible) parameters
+#ifdef TX_TIMEOUT
+#define N_PARAMS_TXTO 1
+#else
+#define N_PARAMS_TXTO 0
+#endif
+#define N_PARAMS (45 + N_PARAMS_WSPR + N_PARAMS_PRESET + N_PARAMS_TXTO)  // number of (visible) parameters
 
 #define N_ALL_PARAMS (N_PARAMS+5)  // number of parameters
 
@@ -4659,12 +4699,28 @@ enum params_t {_NULL, VOLUME, MODE, FILTER, BAND, STEP, VFOSEL, RIT, AGC, NR, AT
 #ifdef FREQ_PRESETS
   PRESET,
 #endif
-  CWDEC, CWTONE, SIDETONE_VOL, CWOFF, SEMIQSK, KEY_WPM, KEY_MODE, KEY_PIN, KEY_TX, VOX, VOXGAIN, DRIVE, TXDELAY, MOX, CWINTERVAL, CWMSG1, CWMSG2, CWMSG3, CWMSG4, CWMSG5, CWMSG6,
+  CWDEC, CWTONE, SIDETONE_VOL, CWOFF, SEMIQSK, KEY_WPM, KEY_MODE, KEY_PIN, KEY_TX, VOX, VOXGAIN, DRIVE, TXDELAY, MOX,
+#ifdef TX_TIMEOUT
+  TX_TIMEOUT_ID,
+#endif
+  CWINTERVAL, CWMSG1, CWMSG2, CWMSG3, CWMSG4, CWMSG5, CWMSG6,
 #ifdef WSPR_BEACON
-  WSPR_CALL, WSPR_GRID, WSPR_PWR, WSPR_PCT, WSPR_RUN,
+  WSPR_MENU, WSPR_CALL, WSPR_GRID, WSPR_PWR, WSPR_PCT, WSPR_OFF, WSPR_MAX, WSPR_RUN,
 #endif
   PWM_MIN, PWM_MAX, SIFXTAL, IQ_ADJ, CALIB, SR, CPULOAD, PARAM_A, PARAM_B, PARAM_C, SWVER, BACKL, FREQA, FREQB, MODEA, MODEB, VERS, ALL=0xff};
 static_assert(SWVER == N_PARAMS, "N_PARAMS must equal the id of the last visible menu item (SWVER)");
+
+// --- MENU_NAV_BEGIN (host-tested: test/menu_nav_test.py extracts this block) ---
+#ifdef WSPR_BEACON
+// Menu position after a turn of the knob (m = new position, d = direction): inside the WSPR menu the list is only its seven items (scrolls round);
+// in the main list those items are skipped and the single WSPR Menu entry stands for them.
+int8_t wspr_menu_nav(int8_t m, int8_t d, uint8_t sub){
+  if(sub){ if(m < WSPR_CALL) m = WSPR_RUN; else if(m > WSPR_RUN) m = WSPR_CALL; }
+  else if((m >= WSPR_CALL) && (m <= WSPR_RUN)) m = (d > 0) ? WSPR_RUN + 1 : WSPR_MENU;
+  return m;
+}
+#endif
+// --- MENU_NAV_END ---
 
 int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
 {
@@ -4732,6 +4788,15 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
 #ifdef MOX_ENABLE
     case MOX:     paramAction(action, mox, 0x35, F("MOX"), NULL, 0, 2, false); break;
 #endif
+#ifdef TX_TIMEOUT
+    case TX_TIMEOUT_ID:
+                  if(byte_param(action, txto, 0, 5, OWN_EEPROM + 14, 0x36, F("TX Timeout"))){
+                    if(txto){ lcd.print((int)opt_n(txto)); lcd.print(F(" min")); } else lcd.print(F("Off"));
+                    lcd_blanks(); lcd_blanks();
+                  }
+                  if((action == LOAD) && (txto > 5)) txto = 0;  // never stored (0xFF) or damaged
+                  break;
+#endif
 #ifdef CW_MESSAGE
     case CWINTERVAL: paramAction(action, cw_msg_interval, 0x41, F("CQ Interval"), NULL, 0, 60, false); break;
     case CWMSG1:    paramAction(action, cw_msg[0],   0x42, F("CQ Message"), sizeof(cw_msg)); break;
@@ -4744,6 +4809,11 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
 #endif
 #endif
 #ifdef WSPR_BEACON
+    case WSPR_MENU:  // one entry in the main list; a click opens the WSPR menu (5.1-5.7), Select goes back
+                  if(action == UPDATE_MENU){
+                    if(menumode >= 2){ wspr_sub = 1; menumode = 1; menu = WSPR_CALL; paramAction(UPDATE_MENU, WSPR_CALL); }
+                    else { printlabel(action, 0x50, F("WSPR Menu")); lcd.print(F("click to open")); lcd_blanks(); }
+                  } break;
     // Stored in their own EEPROM area (WSPR_EEPROM): eeprom_addr is put back afterwards, so enabling WSPR_BEACON does not move other settings.
     case WSPR_CALL:
     case WSPR_GRID:
@@ -4766,7 +4836,22 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
         if(wspr_pct >= _N(wspr_pctv)) wspr_pct = 1;
       }
       } break;
-    case WSPR_RUN:  if((action == UPDATE) || (action == UPDATE_MENU)) paramAction(action, wspr_on, 0x55, F("WSPR Beacon"), offon_label, 0, 1, false); break;  // not stored
+    case WSPR_OFF:
+                  if(byte_param(action, wspr_off, 0, 19, WSPR_EEPROM + 12, 0x55, F("WSPR Offset"))){
+                    if(wspr_off == 19) lcd.print(F("Random"));
+                    else { int16_t o = ((int16_t)wspr_off - 9) * 10; if(o > 0) lcd.print('+'); lcd.print((int)o); lcd.print(F(" Hz")); }
+                    lcd_blanks(); lcd_blanks();
+                  }
+                  if((action == LOAD) && (wspr_off > 19)) wspr_off = 9;
+                  break;
+    case WSPR_MAX:
+                  if(byte_param(action, wspr_max, 0, 5, WSPR_EEPROM + 13, 0x56, F("WSPR Max TX"))){
+                    if(wspr_max){ lcd.print((int)opt_n(wspr_max)); lcd.print(F(" TX")); } else lcd.print(F("No limit"));
+                    lcd_blanks(); lcd_blanks();
+                  }
+                  if((action == LOAD) && (wspr_max > 5)) wspr_max = 0;
+                  break;
+    case WSPR_RUN:  if((action == UPDATE) || (action == UPDATE_MENU)) paramAction(action, wspr_on, 0x57, F("WSPR Beacon"), offon_label, 0, 1, false); break;  // not stored
 #endif //WSPR_BEACON
     case PWM_MIN: paramAction(action, pwm_min, 0x81, F("PA Bias min"), NULL, 0, pwm_max - 1, false); break;
     case PWM_MAX: paramAction(action, pwm_max, 0x82, F("PA Bias max"), NULL, pwm_min, 255, false); break;
@@ -5764,6 +5849,10 @@ void loop()
     cw_msg_event = 0;  // clear cw message event
 #endif //CW_MESSAGE
     switch_rxtx(1);
+#ifdef TX_TIMEOUT
+    uint32_t txto_end = millis() + (uint32_t)opt_n(txto) * 60UL * (F_MCU / 16000UL);  // millis() runs F_MCU/16 MHz-fast: 1000 units per minute-second
+    bool txto_hit = false;
+#endif
     do {
       wdt_reset();
       delay((mode == CW) ? 10 : 100);  // keep the tx keyed for a while before sensing (helps against RFI issues on DAH/DAH line)
@@ -5771,8 +5860,18 @@ void loop()
       if(smeter > 0 && mode == CW && millis() >= stimer) { readSWR(); stimer = millis() + 500; }
 #endif
       if(inv ^ _digitalRead(BUTTONS)) break;  // break if button is pressed (to prevent potential lock-up)
+#ifdef TX_TIMEOUT
+      if(txto && ((int32_t)(millis() - txto_end) >= 0)){ txto_hit = true; break; }  // manual TX timeout (the beacon is not affected)
+#endif
     } while(!_digitalRead(pin)); // until released
     switch_rxtx(0);
+#ifdef TX_TIMEOUT
+    if(txto_hit){
+      lcd.setCursor(0, 1); lcd.print(F("TX timeout      "));
+      while(!_digitalRead(pin)){ wdt_reset(); delay(50); }  // wait for key release, otherwise it would key again
+      delay(1000); wdt_reset(); change = true;
+    }
+#endif
    }
 #endif //TX_ENABLE
 #ifdef KEYER
@@ -5895,14 +5994,28 @@ void loop()
 #endif
           change = true;
         } else {
+#ifdef WSPR_BEACON
+          if((menumode == 1) && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
+#endif
           if(menumode == 1){ menumode = 0; }  // short right-click while in menu: exit menu
-          if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); } // short right-click while in value selection screen: save, and return to menu screen
+          if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); // short right-click while in value selection screen: save, and return to menu screen
+#ifdef WSPR_BEACON
+            if((menu == WSPR_RUN) && wspr_on) menumode = 0;  // beacon switched on: close the menu
+#endif
+          }
         }
 #else
         // Single click on right button: only handle menu navigation, no mode change
         if(menumode){
+#ifdef WSPR_BEACON
+          if((menumode == 1) && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; change = true; paramAction(UPDATE_MENU, menu); } else  // in the WSPR menu: back to the main list
+#endif
           if(menumode == 1){ menumode = 0; }  // short right-click while in menu: exit menu
-          if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); } // short right-click while in value selection screen: save, and return to menu screen
+          if(menumode >= 2){ menumode = 1; change = true; paramAction(SAVE, menu); // short right-click while in value selection screen: save, and return to menu screen
+#ifdef WSPR_BEACON
+            if((menu == WSPR_RUN) && wspr_on) menumode = 0;  // beacon switched on: close the menu
+#endif
+          }
         }
         // When not in menu mode, single click does nothing (mode change disabled)
 #endif //MODE_BUTTON_CHANGE
@@ -6088,9 +6201,15 @@ void loop()
     }
   } else event = 0;  // no button pressed: reset event
 
+#ifdef WSPR_BEACON
+  if(!menumode && wspr_sub){ wspr_sub = 0; menu = WSPR_MENU; }  // left the menu from inside the WSPR menu: next time start at its entry
+#endif
   if((menumode) || (prev_menumode != menumode)){  // Show parameter and value
     int8_t encoder_change = encoder_val;
     if((menumode == 1) && encoder_change){
+#ifdef WSPR_BEACON
+      int8_t dir = (encoder_val > 0) ? 1 : -1;
+#endif
       menu += encoder_val;   // Navigate through menu
 #ifdef ONEBUTTON
       menu = max(0, min(menu, N_PARAMS));
@@ -6098,6 +6217,9 @@ void loop()
       if(menu < 1) menu = N_PARAMS; else if(menu > N_PARAMS) menu = 1;  // scroll round
 #else
       menu = max(1 /* 0 */, min(menu, N_PARAMS));
+#endif
+#ifdef WSPR_BEACON
+      menu = wspr_menu_nav(menu, dir, wspr_sub);  // the WSPR items are in their own list
 #endif
       menu = paramAction(NEXT_MENU, menu);  // auto probe next menu item (gaps may exist)
       encoder_val = 0;
