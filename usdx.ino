@@ -4161,15 +4161,15 @@ uint8_t wspr_tx(){  // one 110.6 s transmission; returns 1 when stopped by a but
   uint8_t _mode = mode;
   uint8_t stop = 0, shown = 0;
   mode = CW;  // constant carrier; switch_rxtx() then keys at (PLL frequency - cw_offset)
-  wspr_top(F("TX"));
+  wspr_top(F("WSPR TX"));
   si5351.freq(WSPR_FREQ + cw_offset, rx_ph_q, 0);  // same PLL set-up as CW receive, so that TX lands on WSPR_FREQ
   uint32_t t0 = millis();
   switch_rxtx(1);
   for(uint8_t k = 0; (k != 162) && !stop; k++){
     si5351.freq_calc_fine(-(int32_t)cw_offset * 256 + wspr_symbol(k) * 375);  // tone spacing 12000/8192 Hz = 375/256 Hz
     si5351.SendPLLRegisterBulk();
-    { uint8_t left = (uint32_t)(162 - k) * 8192 / 12000;  // seconds left, shown as "TX 110s"
-      if((k == 0) || (left != shown)){ shown = left; lcd.setCursor(3, 0); lcd.print(left); lcd.print('s'); lcd.print(' '); lcd.print(' '); } }
+    { uint8_t left = (uint32_t)(162 - k) * 8192 / 12000;  // seconds left, shown as "WSPR TX 110s 5%"
+      if((k == 0) || (left != shown)){ shown = left; lcd.setCursor(8, 0); lcd.print(left); lcd.print('s'); lcd.print(' '); } }
     uint32_t end = t0 + (uint32_t)(k + 1) * 8192 * (F_MCU / 16000) / 12000;    // symbol length 8192/12000 s
     while((int32_t)(millis() - end) < 0){
       wdt_reset();
@@ -4205,8 +4205,8 @@ void wspr_poll(){  // called from loop()
   uint16_t s = (wspr_next - millis()) / (F_MCU / 16000) / 1000 + 1;  // seconds until the next transmission
   if(s != wspr_shown){
     wspr_shown = s;
-    wspr_top(F("Next "));
-    lcd.setCursor(5, 0); lcd.print(s / 60); lcd.print(':'); lcd.print((s % 60) / 10); lcd.print(s % 10);
+    wspr_status((s >= 6000) ? F("WSPR TX ") : F("WSPR TX in "));  // "WSPR TX in 2:59"; the "in" is dropped from 100 minutes on so the time still fits
+    lcd.setCursor((s >= 6000) ? 8 : 11, 0); lcd.print(s / 60); lcd.print(':'); lcd.print((s % 60) / 10); lcd.print(s % 10);
   }
 }
 #endif //WSPR_BEACON

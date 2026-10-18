@@ -17,7 +17,7 @@ Nothing else changes; DIAG stays on, CAT stays off. With the switch off the buil
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|
 | Official | 26,894 | 1,022 | 1,026 |
-| `WSPR_BEACON` | 30,614 (94%) | 1,201 | 847 |
+| `WSPR_BEACON` | 30,616 (94%) | 1,201 | 847 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
 
@@ -38,7 +38,7 @@ Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the 
 1. Set call, grid, power and TX % once (they are saved).
 2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`); the second line shows the message being sent, e.g. `N0ASL EN01 27dBm`, and stays that way while the beacon is on.
 3. Watch the phone's clock and **click SELECT the moment an even minute starts** (e.g. 14:32:00). The moment the button goes down is used, not the end of the click.
-4. The first transmission starts 1 s later, in the slot you synced on, and lasts 110.6 s (top line `TX 110s` counting down the seconds left, with the TX % at the right). Between transmissions the top line shows the time to the next one (`Next 5:21`). The radio receives on the VFO frequency between transmissions, but the VFO knob does not tune while the beacon is on.
+4. The first transmission starts 1 s later, in the slot you synced on, and lasts 110.6 s (top line `WSPR TX 110s 5%`: the seconds left count down, with the TX % at the right). Between transmissions the top line counts down to the next one (`WSPR TX in 5:21`; there is no room for the TX % on that screen). The radio receives on the VFO frequency between transmissions, but the VFO knob does not tune while the beacon is on.
 5. **MENU, SELECT or a VFO knob click stops the beacon**, between or during transmissions. PTT stops a transmission in progress (and the beacon); between transmissions PTT keys the radio normally. To restart, switch 5.5 on again and re-sync with SELECT.
 
 Slots are picked as in WSJT-X: at random, so that beacons on fixed schedules do not keep colliding, with the chosen percentage as the long-run share. Unlike WSJT-X, a transmission is always followed by at least one idle slot, so the PA is never keyed for two slots in a row (at 50 % it alternates exactly, about 46 % key-down).
