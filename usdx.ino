@@ -5,6 +5,7 @@
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define VERSION   "1.0.7"
+#define VERSION_TAG "-N0ASL"  // fork tag: shown in the version menu (10.1) and at start-up; comment out for the official version display
 #define VERSION_DATE __DATE__  // Compile date for version display
 #define EEPROM_VERSION_ID 1  // Increment when EEPROM layout changes (decoupled from VERSION string)
 
@@ -4705,10 +4706,16 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
     case PARAM_B: paramAction(action, param_b, 0x94, F("Param B"), NULL, INT16_MIN, INT16_MAX, false); break;
     case PARAM_C: paramAction(action, param_c, 0x95, F("Param C"), NULL, INT16_MIN, INT16_MAX, false); break;
 #endif
-    case SWVER:   if(action == UPDATE_MENU){ lcd.setCursor(0, 0); lcd.print(F("10.1 Version")); lcd_blanks();
+    case SWVER:   if(action == UPDATE_MENU){ lcd.setCursor(0, 0);
+#ifdef VERSION_TAG
+                  lcd.print(F("10.1 ")); lcd.print(F(VERSION VERSION_TAG)); lcd_blanks();  // 16 characters; the compile date goes on line 2
+                  lcd.setCursor(0, 1); const char* date = __DATE__; for(uint8_t i=0; i<11; i++) lcd.print(date[i]); lcd_blanks(); } break;  // "Mmm DD YYYY"
+#else
+                  lcd.print(F("10.1 Version")); lcd_blanks();
                   lcd.setCursor(0, 1); lcd.print(F("v")); lcd.print(F(VERSION)); lcd.print(F(" "));
                   // Print date as "Mmm DD YY" (e.g., "Feb 15 26") - __DATE__ is "Mmm DD YYYY"
                   const char* date = __DATE__; for(uint8_t i=0; i<7; i++) lcd.print(date[i]); lcd.print(date[9]); lcd.print(date[10]); lcd_blanks(); } break;
+#endif
     // Invisible parameters
     case BACKL:   paramAction(action, backlight, 0, NULL, NULL, 0, 0, false); break;  // Backlight not controllable on this hardware, keep for EEPROM compatibility
     case FREQA:   paramAction(action, vfo[VFOA], 0, NULL, NULL, 0, 0, false); break;
@@ -5278,6 +5285,9 @@ void setup()
 
   show_banner();
   lcd.setCursor(7, 0); lcd.print(F(" R")); lcd.print(F(VERSION)); lcd_blanks();
+#ifdef VERSION_TAG
+  lcd.setCursor(0, 1); lcd.print(F("v" VERSION VERSION_TAG)); lcd_blanks();  // line 2 until the frequency is shown
+#endif
 
 #ifdef QCX
   // Test if QCX has DSP/SDR capability: SIDETONE output disconnected from AUDIO2
