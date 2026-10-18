@@ -32,7 +32,7 @@ Free flash in the official build: **≈5.4 KB**. The `wspr-beacon` branch turns 
 | `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.1–5.5 ([docs](wspr-beacon.md)) | +3,824 (30,718 total) | 847 |
 | `WSPR_BEACON`, `DIAG` off | as above, without the startup self-test | 29,402 total | 847 |
 | `FREQ_PRESETS` | 5 frequency presets, menu 1.14/1.15 ([docs](presets.md)) | +858 | 845 (with the beacon) |
-| branch default: beacon, presets, `DIAG` off | | 30,260 total (94%) | 845 |
+| branch default: beacon, presets, `DIAG` off | | 30,250 total (94%) | 845 |
 
 With this fork's switches off and `DIAG` on, the build is byte-identical to the official firmware.
 

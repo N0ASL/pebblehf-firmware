@@ -60,6 +60,11 @@ int main(){
   strcpy(wspr_call, "N0ASL"); strcpy(wspr_grid, "EN34"); wspr_pwr = 5; wspr_pct = 5;   // 50%: every other slot
   wspr_on = 1; wspr_poll();
   printf("state after switching on: %d\n", wspr_state);
+  lcd.scr[1][15] = 'T';   // the radio's T/R indicator must survive every redraw of line 2
+  wspr_line2(); printf("line 2, 5-character call: '%s'\n", lcd.scr[1]);
+  strcpy(wspr_call, "N0ASLX"); wspr_line2(); printf("line 2, 6-character call: '%s'\n", lcd.scr[1]);
+  strcpy(wspr_call, "K1A"); wspr_line2(); printf("line 2, 3-character call: '%s'\n", lcd.scr[1]);
+  strcpy(wspr_call, "N0ASL"); lcd.scr[1][15] = ' ';
   now = 500000; wspr_press = now; wspr_sync();
   uint32_t t_sync = now;
   int samples = 0, badshow = 0, first_bad = 0;
@@ -118,7 +123,8 @@ def main():
     subprocess.check_call(["c++", "-O1", "-w", "-o", exe, c])
     out = subprocess.run([exe], capture_output=True, text=True, check=True).stdout
     print(out, end="")
-    want = ["state after switching on: 1", "transmissions: 10",
+    want = ["state after switching on: 1", "line 2, 5-character call: 'N0ASL EN34 37  T'",
+            "line 2, 6-character call: 'N0ASLX EN34 37 T'", "line 2, 3-character call: 'K1A EN34 37    T'", "transmissions: 10",
             "TX 0: key-down 1.000 s after sync, key-up after 110.592 s on air",
             "TX 1: key-down 241.000 s after sync, key-up after 110.592 s on air",
             "TX 2: key-down 481.000 s after sync, key-up after 110.592 s on air",

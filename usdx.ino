@@ -4127,12 +4127,13 @@ void wspr_status(const __FlashStringHelper* s){
   lcd.noCursor(); lcd.setCursor(0, 0); lcd.print(s); lcd_blanks(); lcd_blanks();
 }
 
-void wspr_line2(){  // second line while the beacon is on: the message being sent, e.g. "N0ASL EN01 27dBm" ("dB" for a 6-character call, which leaves no room for the m)
+void wspr_line2(){  // second line while the beacon is on: the message being sent, e.g. "N0ASL EN01 27"; column 15 is left alone (the radio's T/R indicator)
   lcd.noCursor(); lcd.setCursor(0, 1);
   uint8_t n = 0;  // call without trailing blanks (the editor can leave a blank in the 6th position)
   for(uint8_t i = 0; wspr_call[i] && (i != 6); i++) if(wspr_call[i] != ' ') n = i + 1;
   for(uint8_t i = 0; i != n; i++) lcd.print(wspr_call[i]);
-  lcd.print(' '); lcd.print(wspr_grid); lcd.print(' '); lcd.print(wspr_dbm[wspr_pwr]); lcd.print((n == 6) ? F("dB") : F("dBm")); lcd_blanks();
+  lcd.print(' '); lcd.print(wspr_grid); lcd.print(' '); lcd.print(wspr_dbm[wspr_pwr]);  // power in dBm, as in the message
+  for(uint8_t c = n + 8; c < 15; c++) lcd.print(' ');  // clear the rest of the line, up to but not including column 15
 }
 
 void wspr_top(const __FlashStringHelper* s){  // first line: state text, then the TX percentage at the right

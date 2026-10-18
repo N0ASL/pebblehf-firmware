@@ -20,7 +20,7 @@ DIAG (the startup self-test) is switched off here to make room; CAT stays off. W
 | Official | 26,894 | 1,022 | 1,026 |
 | `WSPR_BEACON`, DIAG on | 30,718 (95%) | 1,201 | 847 |
 | `WSPR_BEACON`, DIAG off | 29,402 (91%) | 1,201 | 847 |
-| branch default (also with `FREQ_PRESETS`) | 30,260 (94%) | 1,203 | 845 |
+| branch default (also with `FREQ_PRESETS`) | 30,250 (94%) | 1,203 | 845 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
 
@@ -39,7 +39,7 @@ Menu entries (section 5):
 Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the **VFO knob** (turn and click) and the **PTT** key. Text entry uses the firmware's string editor: turn the VFO knob to change a character, click the VFO knob to move to the next character, MENU to save and return to the main screen (SELECT saves and returns to the menu list). For the call the characters are limited to space, 0–9 and A–Z, in that order, wrapping around (turning down from a blank gives Z, Y, X…). The grid only offers what a grid square can contain: letters A–R in the first two positions and digits 0–9 in the last two, each wrapping around; on the first turn the field fills with AA00 so it is always valid. The cursor stops at the last position (6th for the call, 4th for the grid).
 
 1. Set call, grid, power and TX % once (they are saved).
-2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`); the second line shows the message being sent, e.g. `N0ASL EN01 27dBm` (`dB` instead of `dBm` for a 6-character call, which would not fit), and stays that way while the beacon is on.
+2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`); the second line shows the message being sent, e.g. `N0ASL EN01 27` (power in dBm, without the unit: the last column belongs to the radio's T/R indicator, which shows `T` while transmitting and `R` while receiving), and stays that way while the beacon is on.
 3. Watch the phone's clock and **click SELECT the moment an even minute starts** (e.g. 14:32:00). The moment the button goes down is used, not the end of the click.
 4. The first transmission starts 1 s later, in the slot you synced on, and lasts 110.6 s (top line `WSPR TX 110s 5%`: the seconds left count down, with the TX % at the right). Between transmissions the top line counts down to the next one (`WSPR TX in 5:21`; there is no room for the TX % on that screen). The radio receives on the VFO frequency between transmissions, but the VFO knob does not tune while the beacon is on.
 5. **MENU, SELECT or a VFO knob click stops the beacon**, between or during transmissions. PTT stops a transmission in progress (and the beacon); between transmissions PTT keys the radio normally. To restart, switch 5.5 on again and re-sync with SELECT.
