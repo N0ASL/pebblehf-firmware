@@ -4465,6 +4465,14 @@ void paramAction(uint8_t action, char* value, uint8_t menuid, const __FlashStrin
       if(menumode != 3) pos = 0;
       if(menumode == 2) menumode = 3; // hack: for strings enter in edit mode
 #ifdef WSPR_BEACON
+      if(str_alnum == 2){  // grid: positions 0-1 are letters A-R, positions 2-3 are digits 0-9, each wrapping around; all four are kept valid
+        for(uint8_t k = 0; k != 4; k++){
+          const uint8_t lim = (k < 2) ? 18 : 10; const char base = (k < 2) ? 'A' : '0';
+          int16_t v = ((value[k] >= base) && (value[k] < base + lim)) ? value[k] - base : 0;
+          if(k == pos){ v = (v + encoder_val) % lim; if(v < 0) v += lim; }
+          value[k] = base + v;
+        }
+      } else
       if(str_alnum){  // character order: space, 0-9, A-Z (37 characters), wrapping around at both ends
         char ch = value[pos];
         int16_t i = (ch >= 'A' && ch <= 'Z') ? ch - 'A' + 11 : (ch >= '0' && ch <= '9') ? ch - '0' + 1 : 0;
@@ -4632,6 +4640,7 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
       int _addr = eeprom_addr;
       str_alnum = 1;
       if(id == WSPR_CALL){  eeprom_addr = WSPR_EEPROM;      paramAction(action, wspr_call, 0x51, F("WSPR Call"), 6); }
+      str_alnum = 2;
       if(id == WSPR_GRID){  eeprom_addr = WSPR_EEPROM + 6;  paramAction(action, wspr_grid, 0x52, F("WSPR Grid"), 4); }
       str_alnum = 0;
       if(id == WSPR_PWR){   eeprom_addr = WSPR_EEPROM + 10; paramAction(action, wspr_pwr, 0x53, F("WSPR Power"), wspr_pwr_label, 0, _N(wspr_dbm) - 1, false); }

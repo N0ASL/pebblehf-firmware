@@ -17,7 +17,7 @@ Nothing else changes; DIAG stays on, CAT stays off. With the switch off the buil
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|
 | Official | 26,894 | 1,022 | 1,026 |
-| `WSPR_BEACON` | 30,114 (93%) | 1,197 | 851 |
+| `WSPR_BEACON` | 30,254 (93%) | 1,197 | 851 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
 
@@ -28,12 +28,12 @@ Menu entries (section 5):
 | Menu | Values | Notes |
 |---|---|---|
 | 5.1 WSPR Call | text, up to 6 characters | standard calls only (digit as 2nd or 3rd character, e.g. N0ASL, K1ABC, G4ABC); no /P or prefixes |
-| 5.2 WSPR Grid | 4 characters | e.g. EN34 |
+| 5.2 WSPR Grid | 4 characters: two letters A–R, then two digits | e.g. EN34 |
 | 5.3 WSPR Power | 20 / 23 / 27 / 30 / 33 / 37 dBm | the value sent in the message; the radio cannot measure its output. About 5 W (37) on 13.8 V, about 1 W (30) on USB-C |
 | 5.4 WSPR Every | 2 / 4 / 6 / 10 / 20 min | time between transmission starts; default 10 |
 | 5.5 WSPR Beacon | OFF / ON | not stored; always OFF at power-up |
 
-Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the **VFO knob** (turn and click) and the **PTT** key. Text entry uses the firmware's string editor: turn the VFO knob to change a character, click the VFO knob to move to the next character, MENU to save and return to the main screen (SELECT saves and returns to the menu list). For the call and grid the characters are limited to space, 0–9 and A–Z, in that order, wrapping around (turning down from a blank gives Z, Y, X…), and the cursor stops at the last position (6th for the call, 4th for the grid).
+Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the **VFO knob** (turn and click) and the **PTT** key. Text entry uses the firmware's string editor: turn the VFO knob to change a character, click the VFO knob to move to the next character, MENU to save and return to the main screen (SELECT saves and returns to the menu list). For the call the characters are limited to space, 0–9 and A–Z, in that order, wrapping around (turning down from a blank gives Z, Y, X…). The grid only offers what a grid square can contain: letters A–R in the first two positions and digits 0–9 in the last two, each wrapping around; on the first turn the field fills with AA00 so it is always valid. The cursor stops at the last position (6th for the call, 4th for the grid).
 
 1. Set call, grid, power and interval once (they are saved).
 2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`).
