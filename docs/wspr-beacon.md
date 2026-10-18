@@ -6,18 +6,20 @@ A stand-alone WSPR beacon inside the Pebble HF firmware: no Pico, phone or compu
 
 ## Building
 
-Enable the switch near the top of `usdx.ino`:
+The switch is on in this branch, so a plain build of `usdx.ino` is the beacon. Near the top of the file:
 
 ```c
-#define WSPR_BEACON    1   // Stand-alone WSPR beacon ...
+//#define DIAG           1   // off here, to make room (about 1.3 KB)
+#define WSPR_BEACON      1   // Stand-alone WSPR beacon ...
 ```
 
-Nothing else changes; DIAG stays on, CAT stays off. With the switch off the build is byte-for-byte the official firmware (checked: identical hex).
+DIAG (the startup self-test) is switched off here to make room; CAT stays off. With `WSPR_BEACON` commented out and `DIAG` back on, the build is byte-for-byte the official firmware (checked: identical hex).
 
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|
 | Official | 26,894 | 1,022 | 1,026 |
-| `WSPR_BEACON` | 30,718 (95%) | 1,201 | 847 |
+| `WSPR_BEACON`, DIAG on | 30,718 (95%) | 1,201 | 847 |
+| `WSPR_BEACON`, DIAG off (this branch's default) | 29,404 (91%) | 1,201 | 847 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
 

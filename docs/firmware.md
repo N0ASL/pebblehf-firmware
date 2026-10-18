@@ -1,6 +1,6 @@
 # Fork notes: building the firmware
 
-`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches that are **off by default**. A default build is the official firmware.
+`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. In the `wspr-beacon` branch `WSPR_BEACON` is on and `DIAG` is off by default; commenting out `WSPR_BEACON` and restoring `DIAG` gives the official build. A default build is the official firmware.
 
 ## Building
 
@@ -23,15 +23,16 @@ avr-gcc 7.3.0, ArduinoCore-avr 1.8.6, board "Arduino Uno" (32,256 bytes flash us
 | Official (DIAG, KEYER, CW decoder, VOX, …) | 26,894 (83%) | 1,022 | 1,026 |
 | without `DIAG` | 25,578 | 1,022 | 1,026 |
 
-Free flash in the official build: **≈5.4 KB**. This fork keeps DIAG on.
+Free flash in the official build: **≈5.4 KB**. The `wspr-beacon` branch turns DIAG off to make room for the beacon.
 
 ### This fork's switches
 
 | Switch | Adds | Flash | RAM left for stack |
 |---|---|---|---|
 | `WSPR_BEACON` | stand-alone WSPR beacon, menu 5.1–5.5 ([docs](wspr-beacon.md)) | +3,824 (30,718 total) | 847 |
+| `WSPR_BEACON`, `DIAG` off (branch default) | as above, without the startup self-test | 29,404 total | 847 |
 
-With all of this fork's switches off, the build is byte-identical to the official firmware.
+With this fork's switches off and `DIAG` on, the build is byte-identical to the official firmware.
 
 Host tests: `python3 test/wspr_encoder_test.py`, `python3 test/wspr_beacon_sim.py` (need a C++ compiler).
 
