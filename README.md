@@ -1,12 +1,12 @@
 > **This is N0ASL's fork of the Pebble HF firmware** ([mspiceland/usdx-pebblehf](https://github.com/mspiceland/usdx-pebblehf)).
-> It tracks N4FFF's releases (currently **1.0.7**) and adds optional features behind build switches. In this branch the WSPR beacon is **on** and the startup self-test (`DIAG`) is **off**; to get the official firmware back, comment out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and uncomment `DIAG` (then the build is identical to the official one).
+> It tracks N4FFF's releases (currently **1.0.7**) and adds optional features behind build switches. By default the WSPR beacon is **on** and the startup self-test (`DIAG`) is **off**; to get the official firmware back, comment out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and uncomment `DIAG` (then the build is identical to the official one).
 >
 > | Addition | Switch | Status |
 > |---|---|---|
-> | Frequency presets (8 slots; Select opens the picker, Tuning Knob = go, Select = store) and A/B swap (Tuning Knob double click) | `FREQ_PRESETS` | on in this branch, tried on the radio; see [`docs/presets.md`](docs/presets.md) |
-> | Stand-alone WSPR beacon (WSPR menu: call/grid/power/TX %/offset/max TX, manual sync on the even minute) | `WSPR_BEACON` | on in this branch, decoded on the air; see [`docs/wspr-beacon.md`](docs/wspr-beacon.md) |
-> | TX Timeout (menu 3.6: Off, 1, 2, 3, 5, 10 min) for manual key/PTT transmit | `TX_TIMEOUT` | on in this branch, tried on the radio |
-> | Menu scrolls round (last item to first and back) | `MENU_WRAP` | on in this branch |
+> | Frequency presets (8 slots; Select opens the picker, Tuning Knob = go, Select = store) and A/B swap (Tuning Knob double click) | `FREQ_PRESETS` | on by default, tried on the radio; see [`docs/presets.md`](docs/presets.md) |
+> | Stand-alone WSPR beacon (WSPR menu: call/grid/power/TX %/offset/max TX, manual sync on the even minute) | `WSPR_BEACON` | on by default, decoded on the air; see [`docs/wspr-beacon.md`](docs/wspr-beacon.md) |
+> | TX Timeout (menu 3.6: Off, 1, 2, 3, 5, 10 min) for manual key/PTT transmit | `TX_TIMEOUT` | on by default, tried on the radio |
+> | Menu scrolls round (last item to first and back) | `MENU_WRAP` | on by default |
 > | `-N0ASL` version tag; start-up self-test (`DIAG`) off | `VERSION_TAG`, `DIAG` | full list of changes: [`docs/firmware.md`](docs/firmware.md#changes-from-the-official-107-firmware) |
 >
 > Fork notes: [`docs/firmware.md`](docs/firmware.md) (building, flash/RAM sizes, built-in optional switches), [`docs/hardware-notes.md`](docs/hardware-notes.md) (V2.5 board notes, CAT over the LCD lines; Pico interface parked).

@@ -1,12 +1,12 @@
 # WSPR beacon (`WSPR_BEACON`)
 
-Status (18 Oct 2026): **decoded on the air (WSJT-X); the WSPR menu, offset, max TX, TX timeout and the beacon-ON menu close have all been tried on the radio.** Developed on the `wspr-beacon` branch.
+Status (17 Oct 2026): **decoded on the air (WSJT-X); the WSPR menu, offset, max TX, TX timeout and the beacon-ON menu close have all been tried on the radio.**
 
 A stand-alone WSPR beacon inside the Pebble HF firmware: no Pico, phone or computer attached. It sends a standard WSPR message (callsign, 4-character grid, power) on one fixed frequency in the 20 m WSPR window.
 
 ## Building
 
-The switch is on in this branch, so a plain build of `usdx.ino` is the beacon. Near the top of the file:
+The switch is on by default, so a plain build of `usdx.ino` is the beacon. Near the top of the file:
 
 ```c
 //#define DIAG           1   // off here, to make room (about 1.3 KB)
@@ -20,7 +20,7 @@ DIAG (the startup self-test) is switched off here to make room; CAT stays off. W
 | Official | 26,894 | 1,022 | 1,026 |
 | `WSPR_BEACON`, DIAG on | 30,718 (95%) | 1,201 | 847 |
 | `WSPR_BEACON`, DIAG off | 29,402 (91%) | 1,201 | 847 |
-| branch default (presets, TX timeout, WSPR menu) | 31,758 (98%) | 1,219 | 829 |
+| fork default (presets, TX timeout, WSPR menu) | 31,758 (98%) | 1,219 | 829 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FF: WSPR 0x3F0–0x3FD, TX timeout 0x3FE) and do not shift the other settings' addresses.
 

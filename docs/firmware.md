@@ -1,6 +1,6 @@
 # Fork notes: building the firmware
 
-`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. In the `wspr-beacon` branch `WSPR_BEACON` is on and `DIAG` is off by default; commenting out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and restoring `DIAG` gives the official build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up. A default build is the official firmware.
+`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7), unchanged except for this fork's additions, which sit behind build switches. By default this fork's switches are on and `DIAG` is off; commenting out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and restoring `DIAG` gives the official build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up.
 
 ## Changes from the official 1.0.7 firmware
 
@@ -39,7 +39,7 @@ avr-gcc 7.3.0, ArduinoCore-avr 1.8.6, board "Arduino Uno" (32,256 bytes flash us
 | Official (DIAG, KEYER, CW decoder, VOX, …) | 26,894 (83%) | 1,022 | 1,026 |
 | without `DIAG` | 25,578 | 1,022 | 1,026 |
 
-Free flash in the official build: **≈5.4 KB**. The `wspr-beacon` branch turns DIAG off to make room for the beacon.
+Free flash in the official build: **≈5.4 KB**. This fork turns DIAG off to make room for the beacon.
 
 ### This fork's switches
 
@@ -50,7 +50,7 @@ Free flash in the official build: **≈5.4 KB**. The `wspr-beacon` branch turns 
 | `MENU_WRAP` | the menu scrolls round (past the last item comes the first, and the other way) | about +20 | 833 |
 | `FREQ_PRESETS` | 8 frequency presets, menu 1.14 Presets,, Select opens the picker, Tuning Knob goes, Select stores; Tuning Knob double click swaps A/B ([docs](presets.md)) | +1,142 | 833 (with the beacon) |
 | `TX_TIMEOUT` | menu 3.6 TX Timeout (Off/1/2/3/5/10 min) for manual key/PTT transmit; the beacon is not affected | about +300 with the beacon menu changes | 829 |
-| branch default: beacon, presets, TX timeout, `DIAG` off | | 31,758 total (98%) | 829 |
+| fork default: beacon, presets, TX timeout, `DIAG` off | | 31,758 total (98%) | 829 |
 
 Compiler flags: the Arduino AVR core already builds with `-Os`, LTO and section garbage collection. `-mcall-prologues` would save about 560 bytes but slows every function entry and exit, which is risky for the sample-rate-critical receive/transmit code, so it is not used.
 

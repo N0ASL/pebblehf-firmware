@@ -1,6 +1,6 @@
 # Frequency presets and A/B swap (`FREQ_PRESETS`)
 
-Eight saved 20 m frequencies (each with its mode), reached with one press of Select, and a quick VFO A/B swap. On in this branch (switch near the top of `usdx.ino`); about +1,200 bytes of flash over the beacon build, no extra RAM to speak of.
+Eight saved 20 m frequencies (each with its mode), reached with one press of Select, and a quick VFO A/B swap. On by default (switch near the top of `usdx.ino`); about +1,200 bytes of flash over the beacon build, no extra RAM to speak of.
 
 Names follow the Pebble HF field reference: **Tuning Knob** (turn / press), **Menu Button** (left), **Select Button** (right).
 
