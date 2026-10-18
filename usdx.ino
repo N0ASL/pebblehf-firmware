@@ -4107,7 +4107,7 @@ inline uint8_t wspr_symbol(uint8_t k){  // channel symbol 0..3
 char wspr_call[7] = "";
 char wspr_grid[5] = "";
 uint8_t wspr_pwr = 5;          // index into wspr_dbm
-uint8_t wspr_pct = 2;          // index into wspr_pctv: share of the 2-minute slots used for transmitting
+uint8_t wspr_pct = 1;          // index into wspr_pctv (default 10%): share of the 2-minute slots used for transmitting
 uint8_t wspr_on = 0;           // menu "WSPR Beacon" (not stored)
 uint8_t wspr_state = 0;        // 0 off, 1 waiting for the sync press, 2 running
 uint32_t wspr_press;           // millis() when the last button press started
@@ -4119,9 +4119,9 @@ const char* wspr_pwr_label[] = { "20dBm 0.1W", "23dBm 0.2W", "27dBm 0.5W", "30dB
 // TX percentage as in WSJT-X, with the 2-minute slots picked at random. A transmission is always followed by at least one
 // idle slot (keeps the PA at or below about 46% duty); after that each slot is used with probability q = p / (100 - p),
 // which makes the long-run share exactly p. Threshold = 65535 * q, compared with a 16-bit random number.
-const uint8_t wspr_pctv[] = { 5, 10, 20, 25, 33, 50 };
-const char* wspr_pct_label[] = { "5%", "10%", "20%", "25%", "33%", "50%" };
-const uint16_t wspr_thr[] = { 3449, 7282, 16384, 21845, 32768, 65535 };  // 33% means one in three
+const uint8_t wspr_pctv[] = { 5, 10, 25, 50 };
+const char* wspr_pct_label[] = { "5% ~40min", "10% ~20min", "25% ~8min", "50% ~4min" };  // menu text: the average time between transmissions is 2 min / share
+const uint16_t wspr_thr[] = { 3449, 7282, 21845, 65535 };  // 65535 * p / (100 - p); 25% means one slot in three after the idle one
 
 void wspr_status(const __FlashStringHelper* s){
   lcd.noCursor(); lcd.setCursor(0, 0); lcd.print(s); lcd_blanks(); lcd_blanks();
@@ -4138,7 +4138,7 @@ void wspr_line2(){  // second line while the beacon is on: the message being sen
 
 void wspr_top(const __FlashStringHelper* s){  // first line: state text, then the TX percentage at the right
   wspr_status(s);
-  lcd.setCursor((wspr_pctv[wspr_pct] < 10) ? 14 : 13, 0); lcd.print(wspr_pct_label[wspr_pct]);
+  lcd.setCursor((wspr_pctv[wspr_pct] < 10) ? 14 : 13, 0); lcd.print(wspr_pctv[wspr_pct]); lcd.print('%');
 }
 
 void wspr_plan(){  // wspr_next is the slot just used (or the sync slot): move it to the next slot chosen for transmitting
@@ -4740,7 +4740,7 @@ int8_t paramAction(uint8_t action, uint8_t id = ALL)  // list of parameters
         for(uint8_t i = 0; i != 6; i++) if(wspr_call[i] && ((wspr_call[i] < ' ') || (wspr_call[i] > 'Z'))){ memset(wspr_call, 0, sizeof(wspr_call)); break; }
         for(uint8_t i = 0; i != 4; i++) if(wspr_grid[i] && ((wspr_grid[i] < ' ') || (wspr_grid[i] > 'Z'))){ memset(wspr_grid, 0, sizeof(wspr_grid)); break; }
         if(wspr_pwr >= _N(wspr_dbm)) wspr_pwr = 5;
-        if(wspr_pct >= _N(wspr_pctv)) wspr_pct = 2;
+        if(wspr_pct >= _N(wspr_pctv)) wspr_pct = 1;
       }
       } break;
     case WSPR_RUN:  if((action == UPDATE) || (action == UPDATE_MENU)) paramAction(action, wspr_on, 0x55, F("WSPR Beacon"), offon_label, 0, 1, false); break;  // not stored
