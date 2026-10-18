@@ -70,11 +70,6 @@ Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's
 - `python3 test/wspr_encoder_test.py` — compiles the encoder block from `usdx.ino` and compares its 162 symbols with a reference encoder (the KH1 project's, verified against WSJT-X) on 2,000 messages, plus 10 invalid inputs that must be rejected. Also matches the published start of the `K1ABC FN42 37` test vector.
 - `python3 test/wspr_beacon_sim.py` — runs the beacon code against a simulated clock: start 1.000 s after the sync press, 110.592 s on air, slot choice (each TX % measured over 200,000 picks, never two slots in a row), every tone value and time, stop on a button press, refusal of a bad callsign, and the countdown text on a simulated 16x2 display (checked every 5 s against the real time left).
 
-## Not done (possible later)
-
-- WWV time sync (experimental idea: receive 10 MHz, find the minute tone and the even/odd bit).
-- Frequency offset within the window, compound callsigns (type 2/3 messages), other bands.
-
 ## TX Timeout (`TX_TIMEOUT`)
 
 Menu 3.6 TX Timeout: Off (default) / 1 / 2 / 3 / 5 / 10 minutes. A key or PTT held longer than that is cut and the display shows `TX timeout` until the key is released. It applies to manual transmitting only; the beacon already ends each transmission after 110.6 s. Stored at EEPROM 0x3FE.
