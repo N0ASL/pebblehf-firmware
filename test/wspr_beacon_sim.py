@@ -4,7 +4,7 @@
 Extracts the encoder and beacon code from usdx.ino, compiles it for the PC
 with a simulated millis() clock and stand-ins for the LCD, Si5351 and
 switch_rxtx(), and checks: start 1 s after the sync press, 110.592 s on air,
-the 10-minute interval, every tone value and its timing, stop on a button
+the slot choice (TX %, never back to back), every tone value and its timing, stop on a button
 press, and refusal of a bad callsign.
 
 Usage:  python3 test/wspr_beacon_sim.py [path/to/usdx.ino]
@@ -48,7 +48,7 @@ struct { void freq(long f, int, int){ ev.push_back({'F', now, f}); }
 
 MAIN = r'''
 int main(){
-  strcpy(wspr_call, "N0ASL"); strcpy(wspr_grid, "EN34"); wspr_pwr = 5; wspr_every = 3;   // 10 min
+  strcpy(wspr_call, "N0ASL"); strcpy(wspr_grid, "EN34"); wspr_pwr = 5; wspr_pct = 5;   // 50%: every other slot
   wspr_on = 1; wspr_poll();
   printf("state after switching on: %d\n", wspr_state);
   now = 500000; wspr_press = now; wspr_sync();
@@ -73,6 +73,12 @@ int main(){
   for(int i = 0; i < 300000 && wspr_state; i++){ wspr_poll(); now++; }
   int on=0, off=0; for(auto &e: ev) if(e.k=='K') (e.v? on: off)++;
   printf("abort 30 s into TX: state %d, key-down %d, key-up %d\n", wspr_state, on, off);
+  // slot choice: long-run share of slots, and never two transmissions in a row
+  for(int p = 0; p < 6; p++){
+    wspr_pct = p; wspr_next = 0; uint32_t slots = 0, n = 200000, mingap = 99;
+    for(uint32_t i = 0; i < n; i++){ uint32_t a = wspr_next; wspr_plan(); uint32_t g = (wspr_next - a) / 150000; slots += g; if(g < mingap) mingap = g; }
+    printf("TX %d%%: measured %.1f%%, shortest gap %u slots\n", wspr_pctv[p], 100.0 * n / slots, mingap);
+  }
   // bad inputs
   stop_at = -1; strcpy(wspr_call, "ABCDEF"); wspr_on = 1; wspr_state = 0; wspr_poll(); printf("bad call -> on %d state %d\n", wspr_on, wspr_state);
   return 0;
@@ -93,12 +99,15 @@ def main():
     subprocess.check_call(["c++", "-O1", "-w", "-o", exe, c])
     out = subprocess.run([exe], capture_output=True, text=True, check=True).stdout
     print(out, end="")
-    want = ["state after switching on: 1", "transmissions: 3",
+    want = ["state after switching on: 1", "transmissions: 10",
             "TX 0: key-down 1.000 s after sync, key-up after 110.592 s on air",
-            "TX 1: key-down 601.000 s after sync, key-up after 110.592 s on air",
-            "TX 2: key-down 1201.000 s after sync, key-up after 110.592 s on air",
+            "TX 1: key-down 241.000 s after sync, key-up after 110.592 s on air",
+            "TX 2: key-down 481.000 s after sync, key-up after 110.592 s on air",
             "tone writes per TX: 162, first-TX symbol timing late by at most 0.0000 s, errors 0",
-            "abort 30 s into TX: state 0, key-down 1, key-up 1", "bad call -> on 0 state 0"]
+            "abort 30 s into TX: state 0, key-down 1, key-up 1",
+            "TX 5%: measured 5.0%, shortest gap 2 slots", "TX 10%: measured 10.0%, shortest gap 2 slots",
+            "TX 20%: measured 20.0%, shortest gap 2 slots", "TX 25%: measured 25.0%, shortest gap 2 slots",
+            "TX 33%: measured 33.3%, shortest gap 2 slots", "TX 50%: measured 50.0%, shortest gap 2 slots", "bad call -> on 0 state 0"]
     missing = [w for w in want if w not in out]
     for w in missing:
         print("FAIL: expected:", w)

@@ -17,7 +17,7 @@ Nothing else changes; DIAG stays on, CAT stays off. With the switch off the buil
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|
 | Official | 26,894 | 1,022 | 1,026 |
-| `WSPR_BEACON` | 30,354 (94%) | 1,197 | 851 |
+| `WSPR_BEACON` | 30,614 (94%) | 1,201 | 847 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FB) and do not shift the other settings' addresses.
 
@@ -30,16 +30,18 @@ Menu entries (section 5):
 | 5.1 WSPR Call | text, up to 6 characters | standard calls only (digit as 2nd or 3rd character, e.g. N0ASL, K1ABC, G4ABC); no /P or prefixes |
 | 5.2 WSPR Grid | 4 characters: two letters A–R, then two digits | e.g. EN34 |
 | 5.3 WSPR Power | 20 / 23 / 27 / 30 / 33 / 37 dBm | the value sent in the message; the radio cannot measure its output. About 5 W (37) on 13.8 V, about 1 W (30) on USB-C |
-| 5.4 WSPR Every | 2 / 4 / 6 / 10 / 20 min | time between transmission starts; default 10 |
+| 5.4 WSPR TX % | 5 / 10 / 20 / 25 / 33 / 50 % | share of the 2-minute slots used for transmitting, as in WSJT-X; default 20 % |
 | 5.5 WSPR Beacon | OFF / ON | not stored; always OFF at power-up |
 
 Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the **VFO knob** (turn and click) and the **PTT** key. Text entry uses the firmware's string editor: turn the VFO knob to change a character, click the VFO knob to move to the next character, MENU to save and return to the main screen (SELECT saves and returns to the menu list). For the call the characters are limited to space, 0–9 and A–Z, in that order, wrapping around (turning down from a blank gives Z, Y, X…). The grid only offers what a grid square can contain: letters A–R in the first two positions and digits 0–9 in the last two, each wrapping around; on the first turn the field fills with AA00 so it is always valid. The cursor stops at the last position (6th for the call, 4th for the grid).
 
-1. Set call, grid, power and interval once (they are saved).
-2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`).
+1. Set call, grid, power and TX % once (they are saved).
+2. Set **5.5 WSPR Beacon** to ON and leave the menu. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`); the second line shows the message being sent, e.g. `N0ASL EN01 27dBm`, and stays that way while the beacon is on.
 3. Watch the phone's clock and **click SELECT the moment an even minute starts** (e.g. 14:32:00). The moment the button goes down is used, not the end of the click.
-4. The first transmission starts 1 s later and lasts 110.6 s (top line `WSPR TX 110s`, counting down the seconds left). Between transmissions the top line counts down (`WSPR next 8:21`); the radio receives normally, and the VFO knob still tunes.
+4. The first transmission starts 1 s later, in the slot you synced on, and lasts 110.6 s (top line `TX 110s` counting down the seconds left, with the TX % at the right). Between transmissions the top line shows the time to the next one (`Next 5:21`). The radio receives on the VFO frequency between transmissions, but the VFO knob does not tune while the beacon is on.
 5. **MENU, SELECT or a VFO knob click stops the beacon**, between or during transmissions. PTT stops a transmission in progress (and the beacon); between transmissions PTT keys the radio normally. To restart, switch 5.5 on again and re-sync with SELECT.
+
+Slots are picked as in WSJT-X: at random, so that beacons on fixed schedules do not keep colliding, with the chosen percentage as the long-run share. Unlike WSJT-X, a transmission is always followed by at least one idle slot, so the PA is never keyed for two slots in a row (at 50 % it alternates exactly, about 46 % key-down).
 
 Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's crystal drifts a few seconds a day.
 
@@ -53,14 +55,14 @@ Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's
 
 ## Things to watch on the first runs
 
-- **PA heat:** 110 s key-down is much longer than CW or FT8. Start with a dummy load, low supply voltage (or USB-C) and the 10-minute interval; feel the BS170s after each transmission. Healthy Class E efficiency matters (see `TROUBLESHOOTING.md`).
+- **PA heat:** 110 s key-down is much longer than CW or FT8. Start with a dummy load, low supply voltage (or USB-C) and a low TX %; feel the BS170s after each transmission. Healthy Class E efficiency matters (see `TROUBLESHOOTING.md`).
 - **Sidetone:** the CW sidetone sounds for the whole transmission. Set 2.3 CW Side Vol to −1 to mute it.
 - **Frequency:** check the tones land where expected with another receiver running WSJT-X (dial 14.0956 USB, signal at ~1500 Hz audio). An offset of tens of Hz means the Si5351 reference (8.3 Ref freq) needs calibrating; it is still inside the 200 Hz window.
 
 ## Tests (run on a PC)
 
 - `python3 test/wspr_encoder_test.py` — compiles the encoder block from `usdx.ino` and compares its 162 symbols with a reference encoder (the KH1 project's, verified against WSJT-X) on 2,000 messages, plus 10 invalid inputs that must be rejected. Also matches the published start of the `K1ABC FN42 37` test vector.
-- `python3 test/wspr_beacon_sim.py` — runs the beacon code against a simulated clock: start 1.000 s after the sync press, 110.592 s on air, 10-minute interval, every tone value and time, stop on a button press, refusal of a bad callsign.
+- `python3 test/wspr_beacon_sim.py` — runs the beacon code against a simulated clock: start 1.000 s after the sync press, 110.592 s on air, slot choice (each TX % measured over 200,000 picks, never two slots in a row), every tone value and time, stop on a button press, refusal of a bad callsign.
 
 ## Not done (possible later)
 
