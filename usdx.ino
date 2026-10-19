@@ -4135,7 +4135,7 @@ const char* wspr_pwr_label[] = { "20dBm 0.1W", "23dBm 0.2W", "27dBm 0.5W", "30dB
 // idle slot (keeps the PA at or below about 46% duty); after that each slot is used with probability q = p / (100 - p),
 // which makes the long-run share exactly p. Threshold = 65535 * q, compared with a 16-bit random number.
 const uint8_t wspr_pctv[] = { 5, 10, 25, 50 };
-const char* wspr_pct_label[] = { "5% ~40min", "10% ~20min", "25% ~8min", "50% ~4min" };  // menu text: the average time between transmissions is 2 min / share
+const char* wspr_pct_label[] = { "5%", "10%", "25%", "50%" };  // menu text: the percentage only, as WSJT-X shows its Tx Pct (no minutes: the gaps are random)
 const uint16_t wspr_thr[] = { 3449, 7282, 21845, 65535 };  // 65535 * p / (100 - p); 25% means one slot in three after the idle one
 
 void wspr_status(const __FlashStringHelper* s){

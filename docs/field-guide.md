@@ -73,7 +73,7 @@ One-time setup in menu 5.0 WSPR Menu (click to open); the settings are saved:
 | 5.5 | Offset: -90 to +90 Hz, or Random | 0 |
 | 5.6 | Max TX: No limit, 1, 2, 3, 5 or 10 | No limit |
 
-For a short test, set 5.6 Max TX to 1 to 3 so the beacon stops by itself and shows "WSPR done". Power 5.3 is only the number sent; the radio does not measure its output. Use 37 for about 5 W on 13.8 V and 30 for about 1 W on USB-C.
+For a short test, set 5.6 Max TX to 1 to 3 so the beacon stops by itself and shows "WSPR done". Power 5.3 is only the number sent; the radio does not measure its output. Use 37 for about 5 W on 13.8 V and 30 for about 1 W on USB-C. TX % picks slots at random, as in WSJT-X: 50 % transmits every 4 minutes; at 25 % the average is 8 minutes from start to start, but a single gap can be 4 minutes or much longer. After each transmission the top line counts down the real wait.
 
 Each test run:
 

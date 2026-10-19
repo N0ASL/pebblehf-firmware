@@ -22,7 +22,7 @@ DIAG (the startup self-test) is switched off here to make room; CAT stays off. W
 | Official | 26,894 | 1,022 | 1,026 |
 | `WSPR_BEACON`, DIAG on | 30,718 (95%) | 1,201 | 847 |
 | `WSPR_BEACON`, DIAG off | 29,402 (91%) | 1,201 | 847 |
-| fork default (presets, TX timeout, WSPR menu) | 31,710 (98%) | 1,219 | 829 |
+| fork default (presets, TX timeout, WSPR menu) | 31,682 (98%) | 1,191 | 857 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FF: WSPR 0x3F0–0x3FD, TX timeout 0x3FE) and do not shift the other settings' addresses.
 
@@ -36,7 +36,7 @@ Menu entries (section 5): **5.0 WSPR Menu** ("click to open") opens a list of 5.
 | 5.1 WSPR Call | text, up to 6 characters | standard calls only (digit as 2nd or 3rd character, e.g. N0ASL, K1ABC, G4ABC); no /P or prefixes, no blank inside the call (trailing blanks are fine) |
 | 5.2 WSPR Grid | 4 characters: two letters A–R, then two digits | e.g. EN34 |
 | 5.3 WSPR Power | 20 / 23 / 27 / 30 / 33 / 37 dBm | the value sent in the message; the radio cannot measure its output. About 5 W (37) on 13.8 V, about 1 W (30) on USB-C |
-| 5.4 WSPR TX % | 5% ~40min / 10% ~20min / 25% ~8min / 50% ~4min | share of the 2-minute slots used for transmitting, as in WSJT-X; the minutes are the average time between transmissions (2 min / share); default 10 %. A saved choice from an older build is read by position, so check this setting after updating |
+| 5.4 WSPR TX % | 5% / 10% / 25% / 50% | share of the 2-minute slots used for transmitting, the same idea as WSJT-X's Tx Pct; default 10 %. The menu shows only the percentage because the gaps are random (see below). A saved choice from an older build is read by position, so check this setting after updating |
 | 5.5 WSPR Offset | −90 … +90 Hz in 10 Hz steps, or Random | shifts the signal inside the 200 Hz WSPR window (random: new value every transmission); default 0 Hz |
 | 5.6 WSPR Max TX | No limit / 1 / 2 / 3 / 5 / 10 TX | the beacon stops after that many transmissions, shows `WSPR done` and returns to the normal screen |
 | 5.7 WSPR Beacon | click to start | starts the beacon and closes the menu; the beacon is always off at power-up |
@@ -49,7 +49,16 @@ Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the 
 4. The first transmission starts 1 s later, in the slot you synced on, and lasts 110.6 s (top line `WSPR TX 110s 5%`: the seconds left count down, with the TX % at the right). Between transmissions the top line counts down to the next one (`WSPR TX in 5:21`; there is no room for the TX % on that screen). The radio receives on the VFO frequency between transmissions, but the VFO knob does not tune while the beacon is on.
 5. **MENU, SELECT or a VFO knob click stops the beacon**, between or during transmissions. PTT stops a transmission in progress (and the beacon), except with VOX (3.1) on: then the DIT/PTT line is ignored during a transmission, because a sound card on the jack can hold it low (see 1.0.4); between transmissions PTT keys the radio normally. To restart, click 5.7 again and re-sync with SELECT.
 
-Slots are picked as in WSJT-X: at random, so that beacons on fixed schedules do not keep colliding, with the chosen percentage as the long-run share. Unlike WSJT-X, a transmission is always followed by at least one idle slot, so the PA is never keyed for two slots in a row (at 50 % it alternates exactly, about 46 % key-down).
+Slots are picked as in WSJT-X: at random, so that beacons on fixed schedules do not keep colliding, with the chosen percentage as the long-run share. Unlike WSJT-X, a transmission is always followed by at least one idle slot, so the PA is never keyed for two slots in a row (at 50 % it alternates exactly, about 46 % key-down). Time from the start of one transmission to the start of the next (the shortest gap leaves about 2 min 9 s of quiet after a transmission ends):
+
+| TX % | Shortest | Average | 9 gaps in 10 under | 99 in 100 under |
+|---|---|---|---|---|
+| 50% | 4 min | 4 min (always) | 4 min | 4 min |
+| 25% | 4 min | 8 min | 16 min | 28 min |
+| 10% | 4 min | 20 min | 44 min | 84 min |
+| 5% | 4 min | 40 min | 90 min | about 3 h |
+
+Once a transmission has ended the next slot is already chosen, and the top line counts down to it. For a predictable antenna test use 50 % (every 4 minutes) with a small Max TX.
 
 Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's crystal drifts a few seconds a day.
 
