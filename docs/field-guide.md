@@ -1,6 +1,6 @@
 # Pebble HF Field Guide (tentative)
 
-> **Tentative draft.** Not yet reviewed by the owner. It is a preliminary field guide for firmware 1.0.7-N0ASL, to be corrected and updated as the firmware changes. It was checked against the repo at commit ed4aa63 (18 Oct 2026) by reading `usdx.ino` and the repo docs, not by trying each step on the radio. For full details see [OPERATING_MANUAL.md](../OPERATING_MANUAL.md), [wspr-beacon.md](wspr-beacon.md) and [presets.md](presets.md).
+> **Tentative draft.** Not yet reviewed by the owner. It is a preliminary field guide for firmware 1.0.7-N0ASL, to be corrected and updated as the firmware changes. It was checked against the repo at commit ed4aa63 (18 Oct 2026) by reading `usdx.ino` and the repo docs, not by trying each step on the radio; the firmware features it describes have all been tried on the radio (last round 19 Oct 2026). For full details see [OPERATING_MANUAL.md](../OPERATING_MANUAL.md), [wspr-beacon.md](wspr-beacon.md) and [presets.md](presets.md).
 
 | ▶️ **Video walkthrough** |
 |---|
@@ -120,7 +120,7 @@ Most field problems are a setting or a button habit, not a fault. The start-up s
 
 ## Keeping this guide current
 
-Checked against N0ASL/pebblehf-firmware main at commit ed4aa63 (18 Oct 2026) by reading `usdx.ino` and the repo docs, not by trying each step on the radio. When the firmware changes, update the matching section below, the version in the first line of At a glance, and the date at the top.
+Checked against N0ASL/pebblehf-firmware main at commit ed4aa63 (18 Oct 2026) by reading `usdx.ino` and the repo docs, not by trying each step on the radio; the firmware features it describes have all been tried on the radio (last round 19 Oct 2026). When the firmware changes, update the matching section below, the version in the first line of At a glance, and the date at the top.
 
 | Guide section | Re-check against |
 | --- | --- |

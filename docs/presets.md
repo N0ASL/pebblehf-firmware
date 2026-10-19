@@ -2,6 +2,8 @@
 
 Eight saved 20 m frequencies (each with its mode), reached with one press of Select, and a quick VFO A/B swap. On by default (switch near the top of `usdx.ino`); about +1,200 bytes of flash over the beacon build, no extra RAM to speak of.
 
+Status (19 Oct 2026): **tried on the radio: saving and recalling presets in all five modes (AM and FM included), the picker with the small a/b, the A/B swap, and RIT turning off on a swap and on a preset jump.**
+
 Names follow the Pebble HF field reference: **Tuning Knob** (turn / press), **Menu Button** (left), **Select Button** (right).
 
 ## Using it

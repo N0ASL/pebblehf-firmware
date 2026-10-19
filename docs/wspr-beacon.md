@@ -1,6 +1,6 @@
 # WSPR beacon (`WSPR_BEACON`)
 
-Status (17 Oct 2026): **decoded on the air (WSJT-X); the WSPR menu, offset, max TX, TX timeout and click-to-start 5.7 have all been tried on the radio.**
+Status (19 Oct 2026): **decoded on the air (WSJT-X); everything in the beacon has been tried on the radio: the WSPR menu, offset, max TX, click-to-start 5.7, the call and grid check ("Bad WSPR"), the plain TX % and WSJT-X power labels, and PTT being ignored with VOX on.**
 
 > **Heat and power.** The beacon keys the PA continuously for about 110 s per transmission, much longer than CW or FT8, and the PA has no heatsink. Keep it to short, attended tests: use a low TX %, set Max TX to a few transmissions, and let the PA cool between runs. To cut heat, lower the supply voltage (about 1 W on USB-C against about 5 W on 13.8 V). The WSPR Power setting (5.3) only changes the number sent in the message, and TX Drive (3.3) does not change the beacon's output. Use at your own risk; this firmware is provided as is under the MIT license.
 

@@ -16,6 +16,8 @@ Other: `-N0ASL` version tag (`VERSION_TAG`), `DIAG` off by default, splash scree
 
 EEPROM: presets 0x3D0-0x3EF; WSPR settings 0x3F0-0x3FD and TX timeout 0x3FE. Existing settings and calibration do not move, so they survive flashing.
 
+Status (19 Oct 2026): everything listed above has been tried on a V2.5 20 m radio. The byte-identical build with all switches off is a build comparison, not a radio test.
+
 Size of the default build: 31,702 bytes of flash (98 %), 1,211 bytes RAM, 837 bytes left for the stack.
 
 ## Building
