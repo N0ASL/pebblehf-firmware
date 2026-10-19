@@ -2,6 +2,8 @@
 
 > **Tentative draft.** Not yet reviewed by the owner. It is a preliminary field guide for firmware 1.0.7-N0ASL, to be corrected and updated as the firmware changes. It was checked against the repo at commit ed4aa63 (18 Oct 2026) by reading `usdx.ino` and the repo docs, not by trying each step on the radio. For full details see [OPERATING_MANUAL.md](../OPERATING_MANUAL.md), [wspr-beacon.md](wspr-beacon.md) and [presets.md](presets.md).
 
+Video walkthrough: [Pebble HF firmware additions on YouTube](https://youtu.be/kMhRi84KVA4)
+
 ## At a glance
 
 Firmware 1.0.7-N0ASL on the 20 m Pebble HF (14.000–14.350 MHz; USB, LSB, CW, FM, AM). Three controls do everything: the Tuning Knob (turn and press), MENU (left) and SELECT (right).
