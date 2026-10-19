@@ -91,7 +91,7 @@ Three things can cost you in the field: a long key-down heating the PA, a stuck 
 
 | Caution | What to do |
 | --- | --- |
-| PA heat | A WSPR transmission keys the PA for about 110 s, much longer than CW or FT8. Test on a dummy load or low supply voltage first, keep TX % low, and feel the BS170 transistors after each transmission. |
+| PA heat | A WSPR transmission keys the PA for about 110 s, much longer than CW or FT8. Test on a dummy load or low supply voltage first, keep TX % low, and feel the BS170 transistors after each transmission. TX Drive (3.3) does not change the beacon's output; a lower supply voltage does (about 1 W on USB-C against about 5 W on 13.8 V). |
 | Stuck key or PTT | Set menu 3.6 TX Timeout (1, 2, 3, 5 or 10 min). A key held longer is cut and the screen shows "TX timeout" until you release it. Default is Off. The beacon is not affected. |
 | Iambic keyer | Menu 2.6 defaults to Straight. If you pick Iambic A or B, plug a paddle in first; with nothing connected the microphone can trigger the keyer and transmit. |
 | Factory reset | Holding the Tuning Knob down at power-up resets the saved settings to defaults. That includes the calibration values (8.3 Ref freq, 8.4 IQ phase, 8.1 and 8.2 PA bias), so only do it with the EEPROM backup to hand. The WSPR call and grid may also need re-entering. The presets are stored separately. |

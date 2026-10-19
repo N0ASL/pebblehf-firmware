@@ -4,7 +4,7 @@
 > | Addition | Switch | Status |
 > |---|---|---|
 > | Frequency presets (8 slots; Select opens the picker, Tuning Knob = go, Select = store) and A/B swap (Tuning Knob double click) | `FREQ_PRESETS` | on by default, tried on the radio; see [`docs/presets.md`](docs/presets.md) |
-> | Stand-alone WSPR beacon (WSPR menu: call/grid/power/TX %/offset/max TX, manual sync on the even minute) | `WSPR_BEACON` | on by default, decoded on the air; see [`docs/wspr-beacon.md`](docs/wspr-beacon.md) |
+> | Stand-alone WSPR beacon (WSPR menu: call/grid/power/TX %/offset/max TX, manual sync on the even minute) | `WSPR_BEACON` | on by default, decoded on the air; see [`docs/wspr-beacon.md`](docs/wspr-beacon.md) and read its heat and power note first |
 > | TX Timeout (menu 3.6: Off, 1, 2, 3, 5, 10 min) for manual key/PTT transmit | `TX_TIMEOUT` | on by default, tried on the radio |
 > | Menu scrolls round (last item to first and back) | `MENU_WRAP` | on by default |
 > | `-N0ASL` version tag; start-up self-test (`DIAG`) off | `VERSION_TAG`, `DIAG` | full list of changes: [`docs/firmware.md`](docs/firmware.md#changes-from-the-official-107-firmware) |
