@@ -2,9 +2,8 @@
 
 > **Tentative draft.** Not yet reviewed by the owner. It is a preliminary field guide for firmware 1.0.7-N0ASL, to be corrected and updated as the firmware changes. It was checked against the repo at commit ed4aa63 (18 Oct 2026) by reading `usdx.ino` and the repo docs, not by trying each step on the radio. For full details see [OPERATING_MANUAL.md](../OPERATING_MANUAL.md), [wspr-beacon.md](wspr-beacon.md) and [presets.md](presets.md).
 
-<a href="https://youtu.be/kMhRi84KVA4"><img src="https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg" width="200" alt="Pebble HF firmware additions on YouTube"></a>
-
-Video walkthrough: [Pebble HF firmware additions on YouTube](https://youtu.be/kMhRi84KVA4)
+<a href="https://youtu.be/kMhRi84KVA4"><img src="https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg" width="200" alt="Pebble HF firmware additions on YouTube"></a><br>
+▶️ **Video walkthrough:** [Pebble HF firmware additions on YouTube](https://youtu.be/kMhRi84KVA4)
 
 ## At a glance
 

@@ -9,9 +9,8 @@
 > | Menu scrolls round (last item to first and back) | `MENU_WRAP` | on by default |
 > | `-N0ASL` version tag; start-up self-test (`DIAG`) off | `VERSION_TAG`, `DIAG` | full list of changes: [`docs/firmware.md`](docs/firmware.md#changes-from-the-official-107-firmware) |
 >
-> <a href="https://youtu.be/kMhRi84KVA4"><img src="https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg" width="200" alt="Pebble HF firmware additions on YouTube"></a>
->
-> Video walkthrough of the fork's additions: [Pebble HF firmware additions on YouTube](https://youtu.be/kMhRi84KVA4)
+> <a href="https://youtu.be/kMhRi84KVA4"><img src="https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg" width="200" alt="Pebble HF firmware additions on YouTube"></a><br>
+> ▶️ **Video walkthrough** of the fork's additions: [Pebble HF firmware additions on YouTube](https://youtu.be/kMhRi84KVA4)
 >
 > Fork notes: [`docs/firmware.md`](docs/firmware.md) (building, flash/RAM sizes, built-in optional switches), [`docs/hardware-notes.md`](docs/hardware-notes.md) (V2.5 board notes, CAT over the LCD lines; Pico interface parked).
 > Update from upstream: `git fetch upstream && git merge upstream/main`.
