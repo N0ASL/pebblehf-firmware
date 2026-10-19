@@ -1,6 +1,8 @@
 > **This is N0ASL's fork of the Pebble HF firmware** ([mspiceland/usdx-pebblehf](https://github.com/mspiceland/usdx-pebblehf)).
 > It tracks N4FFF's releases (currently **1.0.7**) and adds optional features behind build switches. By default the WSPR beacon is **on** and the startup self-test (`DIAG`) is **off**; to get the official firmware back, comment out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and uncomment `DIAG` (then the build is identical to the official one).
 >
+> **Want the start-up self-test (`DIAG`) too? You can keep it and try the WSPR beacon on its own: build with only the WSPR beacon switched on and `DIAG` switched on. That build comes to about 30.7 KB, under the 32,256-byte limit. The full set of added features plus `DIAG` doesn't fit in the flash.**
+>
 > | Addition | Switch | Status |
 > |---|---|---|
 > | Frequency presets (8 slots; Select opens the picker, Tuning Knob = go, Select = store) and A/B swap (Tuning Knob double click) | `FREQ_PRESETS` | on by default, tried on the radio; see [`docs/presets.md`](docs/presets.md) |
