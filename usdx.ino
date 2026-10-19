@@ -4427,7 +4427,7 @@ void preset_print(uint32_t v){  // "14.0300 CW " (frequency in MHz with 100 Hz r
 void preset_draw(){  // top line: the keys; bottom line: active VFO, slot number and its content. Column 15 is left to the T/R indicator.
   lcd.noCursor();
   lcd.setCursor(0, 0); lcd.print(F("KNOB=go SEL=save"));
-  lcd.setCursor(0, 1); lcd.print((vfosel % 2) ? 'B' : 'A'); lcd.print(preset_sel + 1); lcd.print(' ');  // "A1 14.0300 CW"
+  lcd.setCursor(0, 1); lcd.print((vfosel % 2) ? '\x07' : '\x06'); lcd.print(preset_sel + 1); lcd.print(' ');  // small a/b as on the main screen, then slot: "a1 14.0300 CW"
   uint32_t v = preset_get(preset_sel);
   uint8_t len = 3 + 11;
   if(v){ preset_print(v); } else { lcd.print(F("empty")); len = 3 + 5; }

@@ -36,7 +36,7 @@ Power it from 13.8 V for about 5 W, or from USB-C for about 1 W (USB-C carries p
 
 ## Presets and VFO A/B
 
-Eight saved frequencies (each with its mode) are one SELECT press away; double-clicking the Tuning Knob swaps VFO A and B. From the main screen, a short press of SELECT opens the picker (menu 1.14 Presets does the same). It works on whichever VFO is active; the letter on the bottom line (A1, B6) shows which.
+Eight saved frequencies (each with its mode) are one SELECT press away; double-clicking the Tuning Knob swaps VFO A and B. From the main screen, a short press of SELECT opens the picker (menu 1.14 Presets does the same). It works on whichever VFO is active; the small a or b at the start of the bottom line (a1, b6), the same one the main screen uses, shows which.
 
 | In the picker | What happens |
 | --- | --- |

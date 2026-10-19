@@ -16,7 +16,7 @@ In the picker the radio shows the keys on the top line and the slot on the botto
 
 ```
 KNOB=go SEL=save
-A1 14.0300 CW
+a1 14.0300 CW
 ```
 
 | In the picker | What happens |
@@ -26,7 +26,7 @@ A1 14.0300 CW
 | Short press **Select** | Store the active VFO's current frequency and mode in the slot shown. `Saved to 6` appears for a moment, then the slot is shown again. Careful: Select also opens the picker, so a quick second press right after opening stores into slot 1. |
 | Short press **Menu** | Leave the picker without changing anything. |
 
-The picker never asks for VFO A or B: it works on whichever one is active, and the letter at the start of the bottom line (`A1`, `B6`) shows which. To set both VFOs, do it once, double-click the Tuning Knob, and do it again.
+The picker never asks for VFO A or B: it works on whichever one is active, and the letter at the start of the bottom line (`a1`, `b6`) shows which; it is the same small a or b the main screen uses. To set both VFOs, do it once, double-click the Tuning Knob, and do it again.
 
 Factory slots (used until you store your own over them): 1 14.030 CW, 2 14.060 CW, 3 14.100 CW, 4 14.250 USB, 5 14.285 USB. Slots 6–8 start empty (`empty`). The CW slots set the CW filter and the 500 Hz tuning step, the USB slots the 1 kHz step, as the Mode menu does.
 
