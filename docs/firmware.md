@@ -16,7 +16,7 @@ Other: `-N0ASL` version tag (`VERSION_TAG`), `DIAG` off by default, splash scree
 
 EEPROM: presets 0x3D0-0x3EF; WSPR settings 0x3F0-0x3FD and TX timeout 0x3FE. Existing settings and calibration do not move, so they survive flashing.
 
-Size of the default build: 31,682 bytes of flash (98 %), 1,191 bytes RAM, 857 bytes left for the stack.
+Size of the default build: 31,702 bytes of flash (98 %), 1,211 bytes RAM, 837 bytes left for the stack.
 
 ## Building
 
@@ -50,7 +50,7 @@ Free flash in the official build: **≈5.4 KB**. This fork turns DIAG off to mak
 | `MENU_WRAP` | the menu scrolls round (past the last item comes the first, and the other way) | about +20 | 833 |
 | `FREQ_PRESETS` | 8 frequency presets, menu 1.14 Presets,, Select opens the picker, Tuning Knob goes, Select stores; Tuning Knob double click swaps A/B ([docs](presets.md)) | +1,142 | 833 (with the beacon) |
 | `TX_TIMEOUT` | menu 3.6 TX Timeout (Off/1/2/3/5/10 min) for manual key/PTT transmit; the beacon is not affected | about +300 with the beacon menu changes | 829 |
-| fork default: beacon, presets, TX timeout, `DIAG` off | | 31,682 total (98%) | 857 |
+| fork default: beacon, presets, TX timeout, `DIAG` off | | 31,702 total (98%) | 837 |
 
 Compiler flags: the Arduino AVR core already builds with `-Os`, LTO and section garbage collection. `-mcall-prologues` would save about 560 bytes but slows every function entry and exit, which is risky for the sample-rate-critical receive/transmit code, so it is not used.
 

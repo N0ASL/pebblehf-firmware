@@ -22,7 +22,7 @@ DIAG (the startup self-test) is switched off here to make room; CAT stays off. W
 | Official | 26,894 | 1,022 | 1,026 |
 | `WSPR_BEACON`, DIAG on | 30,718 (95%) | 1,201 | 847 |
 | `WSPR_BEACON`, DIAG off | 29,402 (91%) | 1,201 | 847 |
-| fork default (presets, TX timeout, WSPR menu) | 31,682 (98%) | 1,191 | 857 |
+| fork default (presets, TX timeout, WSPR menu) | 31,702 (98%) | 1,211 | 837 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FF: WSPR 0x3F0–0x3FD, TX timeout 0x3FE) and do not shift the other settings' addresses.
 
@@ -35,7 +35,7 @@ Menu entries (section 5): **5.0 WSPR Menu** ("click to open") opens a list of 5.
 |---|---|---|
 | 5.1 WSPR Call | text, up to 6 characters | standard calls only (digit as 2nd or 3rd character, e.g. N0ASL, K1ABC, G4ABC); no /P or prefixes, no blank inside the call (trailing blanks are fine) |
 | 5.2 WSPR Grid | 4 characters: two letters A–R, then two digits | e.g. EN34 |
-| 5.3 WSPR Power | 20 / 23 / 27 / 30 / 33 / 37 dBm | the value sent in the message; the radio cannot measure its output. About 5 W (37) on 13.8 V, about 1 W (30) on USB-C |
+| 5.3 WSPR Power | 20 / 23 / 27 / 30 / 33 / 37 dBm | shown as WSJT-X lists them (`20 dBm  100 mW` … `37 dBm  5 W`); the value sent in the message; the radio cannot measure its output. About 5 W (37) on 13.8 V, about 1 W (30) on USB-C |
 | 5.4 WSPR TX % | 5% / 10% / 25% / 50% | share of the 2-minute slots used for transmitting, the same idea as WSJT-X's Tx Pct; default 10 %. The menu shows only the percentage because the gaps are random (see below). A saved choice from an older build is read by position, so check this setting after updating |
 | 5.5 WSPR Offset | −90 … +90 Hz in 10 Hz steps, or Random | shifts the signal inside the 200 Hz WSPR window (random: new value every transmission); default 0 Hz |
 | 5.6 WSPR Max TX | No limit / 1 / 2 / 3 / 5 / 10 TX | the beacon stops after that many transmissions, shows `WSPR done` and returns to the normal screen |

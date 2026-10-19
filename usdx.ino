@@ -4130,7 +4130,7 @@ uint8_t wspr_max = 0;          // stop after this many transmissions: index into
 uint8_t wspr_sent = 0;         // transmissions completed since the sync
 uint8_t wspr_sub = 0;          // 1 while the WSPR menu (5.1-5.7) is open
 const uint8_t wspr_dbm[] = { 20, 23, 27, 30, 33, 37 };
-const char* wspr_pwr_label[] = { "20dBm 0.1W", "23dBm 0.2W", "27dBm 0.5W", "30dBm 1W", "33dBm 2W", "37dBm 5W" };
+const char* wspr_pwr_label[] = { "20 dBm  100 mW", "23 dBm  200 mW", "27 dBm  500 mW", "30 dBm  1 W", "33 dBm  2 W", "37 dBm  5 W" };  // as WSJT-X labels its Tx power list
 // TX percentage as in WSJT-X, with the 2-minute slots picked at random. A transmission is always followed by at least one
 // idle slot (keeps the PA at or below about 46% duty); after that each slot is used with probability q = p / (100 - p),
 // which makes the long-run share exactly p. Threshold = 65535 * q, compared with a 16-bit random number.
