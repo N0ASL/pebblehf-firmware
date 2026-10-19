@@ -101,6 +101,7 @@ int main(){
   char call[16], grid[16]; int dbm;
   while(scanf("%%15s %%15s %%d", call, grid, &dbm) == 3){
     if(call[0] == '_') call[0] = 0;
+    for(char* q = call; *q; q++) if(*q == '.') *q = ' ';  // '.' stands for a blank inside the call
     uint8_t r = wspr_encode(call, grid, (uint8_t)dbm);
     if(r){ printf("E%%d\n", r); continue; }
     for(uint8_t k = 0; k != 162; k++) putchar('0' + wspr_symbol(k));
@@ -147,7 +148,7 @@ def main():
     # Invalid inputs the device must reject (1 = callsign, 2 = grid)
     bad = [("K1", "FN42", 37, 1), ("ABCDEF", "FN42", 37, 1), ("K1ABCDE", "FN42", 37, 1), ("KK1ABCD", "FN42", 37, 1),
            ("K1A2C", "FN42", 37, 1), ("K1ABC", "SN42", 37, 2), ("K1ABC", "FNA2", 37, 2), ("K1ABC", "FN4", 37, 2),
-           ("K1-BC", "FN42", 37, 1), ("_", "FN42", 37, 1)]
+           ("K1-BC", "FN42", 37, 1), ("_", "FN42", 37, 1), ("N0A.SL", "EN34", 37, 1), (".N0ASL", "EN34", 37, 1)]
     inp = "".join("%s %s %d\n" % c for c in cases) + "".join("%s %s %d\n" % b[:3] for b in bad)
     out = subprocess.run([exe], input=inp, capture_output=True, text=True, check=True).stdout.split("\n")
     fails = 0

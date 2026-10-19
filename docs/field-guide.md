@@ -12,7 +12,7 @@ Firmware 1.0.7-N0ASL on the 20 m Pebble HF (14.000–14.350 MHz; USB, LSB, CW, F
 | Tuning Knob | Short press | Bigger tuning step |
 | Tuning Knob | Long press | Smaller tuning step |
 | Tuning Knob | Press and turn | Volume (turning below 0 powers off) |
-| Tuning Knob | Double click | Swap VFO A and B |
+| Tuning Knob | Double click | Swap VFO A and B (turns RIT off) |
 | SELECT | Short press | Open the preset picker |
 | SELECT | Double click | Cycle the filter width |
 | SELECT | Long press | RIT on or off; a second long press swaps VFO A and B |
@@ -41,7 +41,7 @@ Eight saved frequencies (each with its mode) are one SELECT press away; double-c
 | In the picker | What happens |
 | --- | --- |
 | Turn the knob | Step through slots 1 to 8 (nothing is tuned yet) |
-| Short press the knob | Go: tune the active VFO to that slot; does nothing on an empty slot |
+| Short press the knob | Go: tune the active VFO to that slot (RIT off); does nothing on an empty slot |
 | Short press SELECT | Store the current frequency and mode in the slot shown ("Saved to n") |
 | Short press MENU | Leave without changing anything |
 
@@ -66,7 +66,7 @@ One-time setup in menu 5.0 WSPR Menu (click to open); the settings are saved:
 
 | Menu | Setting | Default |
 | --- | --- | --- |
-| 5.1 | Call (standard calls only, no /P) | none |
+| 5.1 | Call (standard calls only, no /P, no blank inside) | none |
 | 5.2 | Grid, four characters, e.g. EN34 | none |
 | 5.3 | Power sent in the message: 20, 23, 27, 30, 33 or 37 dBm | 37 |
 | 5.4 | TX %: 5, 10, 25 or 50 | 10 |
@@ -80,7 +80,7 @@ Each test run:
 1. Click 5.7 WSPR Beacon. The menu closes and the top line shows "SEL at even min".
 2. Watch a clock and click SELECT the moment an even minute starts (for example 14:32:00). The moment the button goes down is used.
 3. The first transmission starts 1 s later and lasts about 110 s. The top line counts down ("WSPR TX 110s 5%"), then shows the wait until the next one ("WSPR TX in 5:21").
-4. To stop, click MENU, SELECT or the Tuning Knob. PTT stops a transmission in progress.
+4. To stop, click MENU, SELECT or the Tuning Knob. PTT stops a transmission in progress, unless VOX (3.1) is on.
 5. To restart, click 5.7 again and re-sync with SELECT.
 
 Re-sync at the start of every session, because WSPR tolerates about 2 s and the crystal drifts a few seconds a day. The knob does not tune while the beacon is on. The beacon is always off at power-up. The CW sidetone sounds for the whole transmission; set 2.3 CW Side Vol to -1 to mute it. For a dry run with no RF, turn on 2.8 Practice first.
@@ -92,7 +92,7 @@ Three things can cost you in the field: a long key-down heating the PA, a stuck 
 | Caution | What to do |
 | --- | --- |
 | PA heat | A WSPR transmission keys the PA for about 110 s, much longer than CW or FT8. Test on a dummy load or low supply voltage first, keep TX % low, and feel the BS170 transistors after each transmission. TX Drive (3.3) does not change the beacon's output; a lower supply voltage does (about 1 W on USB-C against about 5 W on 13.8 V). |
-| Stuck key or PTT | Set menu 3.6 TX Timeout (1, 2, 3, 5 or 10 min). A key held longer is cut and the screen shows "TX timeout" until you release it. Default is Off. The beacon is not affected. |
+| Stuck key or PTT | Set menu 3.6 TX Timeout (1, 2, 3, 5 or 10 min). A straight key or PTT held longer is cut and the screen shows "TX timeout" until you release it. Default is Off. It does not cover VOX, the iambic keyer, CQ messages or the beacon. |
 | Iambic keyer | Menu 2.6 defaults to Straight. If you pick Iambic A or B, plug a paddle in first; with nothing connected the microphone can trigger the keyer and transmit. |
 | Factory reset | Holding the Tuning Knob down at power-up resets the saved settings to defaults. That includes the calibration values (8.3 Ref freq, 8.4 IQ phase, 8.1 and 8.2 PA bias), so only do it with the EEPROM backup to hand. The WSPR call and grid may also need re-entering. The presets are stored separately. |
 | PA bias | Leave 8.1 and 8.2 alone unless you understand PA biasing; wrong values can damage the PA. |

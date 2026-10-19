@@ -33,6 +33,7 @@ inline uint8_t opt_n(uint8_t i){ return (i < 4) ? i : (i == 4) ? 5 : 10; }
 #define BUTTONS 17
 #define DIT 13
 uint8_t inv = 0;
+uint8_t vox = 0;  // VOX off: the beacon watches the DIT line
 int digitalRead(int p){ if(p == BUTTONS) return btn(); return 1; }
 #include <string>
 struct Lcd { char scr[2][17]; int r = 0, c = 0;

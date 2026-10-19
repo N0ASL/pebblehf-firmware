@@ -4071,6 +4071,7 @@ uint8_t wspr_encode(const char* call, const char* grid, uint8_t dbm){
   uint8_t len = 0;
   for(; len < 7 && call[len] && call[len] != ' '; len++);
   if(len < 3 || len > 6) return 1;
+  for(uint8_t i = len; i < 6 && call[i]; i++) if(call[i] != ' ') return 1;  // only trailing blanks: "N0A SL" is not sent as N0A
   uint8_t sh = (wspr_chr(call[2]) <= 9) ? 0 : (wspr_chr(call[1]) <= 9) ? 1 : 2;  // digit must end up at position 2
   if(sh == 2 || len + sh > 6) return 1;
   for(uint8_t i = 0; i != 6; i++) c6[i] = (i < sh || i >= len + sh) ? ' ' : call[i - sh];
@@ -4196,7 +4197,7 @@ uint8_t wspr_tx(){  // one 110.6 s transmission; returns 1 when stopped by a but
     uint32_t end = t0 + (uint32_t)(k + 1) * 8192 * (F_MCU / 16000) / 12000;    // symbol length 8192/12000 s
     while((int32_t)(millis() - end) < 0){
       wdt_reset();
-      if((inv ^ digitalRead(BUTTONS)) || !digitalRead(DIT)){ stop = 1; break; }
+      if((inv ^ digitalRead(BUTTONS)) || (!vox && !digitalRead(DIT))){ stop = 1; break; }  // with VOX on the DIT line is ignored (sound-card bias on Tip, see 1.0.4)
     }
   }
   switch_rxtx(0);
@@ -5927,7 +5928,7 @@ void loop()
     if(preset_pick){  // preset picker: Tuning Knob press = go, Select = store, Menu = cancel; everything else is ignored
       if((event == (BE|SC)) && preset_get(preset_sel)){
         uint32_t v = preset_get(preset_sel);
-        freq = v & 0xFFFFFFUL; mode = v >> 24;
+        freq = v & 0xFFFFFFUL; mode = v >> 24; rit = 0;  // RIT off, as the original VFO swap does
         vfomode[vfosel%2] = mode;
         paramAction(SAVE, (vfosel%2) ? MODEB : MODEA);
         if(mode != CW) stepsize = STEP_1k; else stepsize = STEP_500;
@@ -6102,7 +6103,8 @@ void loop()
         //stepsize = STEP_1k;
         //change = true;
 #ifdef FREQ_PRESETS
-        if(!menumode){  // Tuning Knob double click: swap VFO A and B
+        if(!menumode){  // Tuning Knob double click: swap VFO A and B (RIT off, as with the original long-press swap)
+          rit = 0;
           vfosel = !vfosel;
           freq = vfo[vfosel%2];
           mode = vfomode[vfosel%2];

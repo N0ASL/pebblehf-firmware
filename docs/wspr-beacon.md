@@ -22,7 +22,7 @@ DIAG (the startup self-test) is switched off here to make room; CAT stays off. W
 | Official | 26,894 | 1,022 | 1,026 |
 | `WSPR_BEACON`, DIAG on | 30,718 (95%) | 1,201 | 847 |
 | `WSPR_BEACON`, DIAG off | 29,402 (91%) | 1,201 | 847 |
-| fork default (presets, TX timeout, WSPR menu) | 31,714 (98%) | 1,219 | 829 |
+| fork default (presets, TX timeout, WSPR menu) | 31,740 (98%) | 1,219 | 829 |
 
 Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive flashing this build: the WSPR settings live in their own EEPROM area (0x3F0–0x3FF: WSPR 0x3F0–0x3FD, TX timeout 0x3FE) and do not shift the other settings' addresses.
 
@@ -33,7 +33,7 @@ Menu entries (section 5): **5.0 WSPR Menu** ("click to open") opens a list of 5.
 
 | Menu | Values | Notes |
 |---|---|---|
-| 5.1 WSPR Call | text, up to 6 characters | standard calls only (digit as 2nd or 3rd character, e.g. N0ASL, K1ABC, G4ABC); no /P or prefixes |
+| 5.1 WSPR Call | text, up to 6 characters | standard calls only (digit as 2nd or 3rd character, e.g. N0ASL, K1ABC, G4ABC); no /P or prefixes, no blank inside the call (trailing blanks are fine) |
 | 5.2 WSPR Grid | 4 characters: two letters A–R, then two digits | e.g. EN34 |
 | 5.3 WSPR Power | 20 / 23 / 27 / 30 / 33 / 37 dBm | the value sent in the message; the radio cannot measure its output. About 5 W (37) on 13.8 V, about 1 W (30) on USB-C |
 | 5.4 WSPR TX % | 5% ~40min / 10% ~20min / 25% ~8min / 50% ~4min | share of the 2-minute slots used for transmitting, as in WSJT-X; the minutes are the average time between transmissions (2 min / share); default 10 %. A saved choice from an older build is read by position, so check this setting after updating |
@@ -47,7 +47,7 @@ Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the 
 2. Click **5.7 WSPR Beacon**: the menu closes. The top line shows `SEL at even min` (or `WSPR: bad call` / `WSPR: bad grid`); the second line shows the message being sent, e.g. `N0ASL EN01 27` (power in dBm, without the unit: the last column belongs to the radio's T/R indicator, which shows `T` while transmitting and `R` while receiving), and stays that way while the beacon is on.
 3. Watch the phone's clock and **click SELECT the moment an even minute starts** (e.g. 14:32:00). The moment the button goes down is used, not the end of the click.
 4. The first transmission starts 1 s later, in the slot you synced on, and lasts 110.6 s (top line `WSPR TX 110s 5%`: the seconds left count down, with the TX % at the right). Between transmissions the top line counts down to the next one (`WSPR TX in 5:21`; there is no room for the TX % on that screen). The radio receives on the VFO frequency between transmissions, but the VFO knob does not tune while the beacon is on.
-5. **MENU, SELECT or a VFO knob click stops the beacon**, between or during transmissions. PTT stops a transmission in progress (and the beacon); between transmissions PTT keys the radio normally. To restart, click 5.7 again and re-sync with SELECT.
+5. **MENU, SELECT or a VFO knob click stops the beacon**, between or during transmissions. PTT stops a transmission in progress (and the beacon), except with VOX (3.1) on: then the DIT/PTT line is ignored during a transmission, because a sound card on the jack can hold it low (see 1.0.4); between transmissions PTT keys the radio normally. To restart, click 5.7 again and re-sync with SELECT.
 
 Slots are picked as in WSJT-X: at random, so that beacons on fixed schedules do not keep colliding, with the chosen percentage as the long-run share. Unlike WSJT-X, a transmission is always followed by at least one idle slot, so the PA is never keyed for two slots in a row (at 50 % it alternates exactly, about 46 % key-down).
 
@@ -74,4 +74,4 @@ Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's
 
 ## TX Timeout (`TX_TIMEOUT`)
 
-Menu 3.6 TX Timeout: Off (default) / 1 / 2 / 3 / 5 / 10 minutes. A key or PTT held longer than that is cut and the display shows `TX timeout` until the key is released. It applies to manual transmitting only; the beacon already ends each transmission after 110.6 s. Stored at EEPROM 0x3FE.
+Menu 3.6 TX Timeout: Off (default) / 1 / 2 / 3 / 5 / 10 minutes. A key or PTT held longer than that is cut and the display shows `TX timeout` until the key is released. It covers a straight key or PTT held down only: not VOX transmit, the iambic keyer or CQ messages. The beacon already ends each transmission after 110.6 s. Stored at EEPROM 0x3FE.

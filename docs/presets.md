@@ -10,7 +10,7 @@ Names follow the Pebble HF field reference: **Tuning Knob** (turn / press), **Me
 |---|---|
 | Short press **Select** | Opens the preset picker (the press does nothing otherwise, as the mode-cycling option is off). |
 | Menu **1.14 Presets** | Browse to it (`click to open`) and click: opens the same picker. This is the way to find the feature without knowing the shortcut. |
-| **Double click Tuning Knob** | Swaps VFO A and B (also saved, so the radio starts on the same VFO). Before this, the only ways were menu 1.6 or two long presses of Select with RIT in between. |
+| **Double click Tuning Knob** | Swaps VFO A and B (also saved, so the radio starts on the same VFO). Before this, the only ways were menu 1.6 or two long presses of Select with RIT in between. RIT is turned off, as with the long-press swap. |
 
 In the picker the radio shows the keys on the top line and the slot on the bottom:
 
@@ -22,7 +22,7 @@ a1 14.0300 CW
 | In the picker | What happens |
 |---|---|
 | Turn the **Tuning Knob** | Step through slots 1–8. Nothing is tuned yet, so the VFO keeps its frequency. |
-| Short press **Tuning Knob** | Go: tune the **active** VFO to the slot (frequency and mode, with the usual CW/SSB filter and step) and leave the picker. Does nothing on an empty slot. |
+| Short press **Tuning Knob** | Go: tune the **active** VFO to the slot (frequency and mode, with the usual CW/SSB filter and step; RIT off) and leave the picker. Does nothing on an empty slot. |
 | Short press **Select** | Store the active VFO's current frequency and mode in the slot shown. `Saved to 6` appears for a moment, then the slot is shown again. Careful: Select also opens the picker, so a quick second press right after opening stores into slot 1. |
 | Short press **Menu** | Leave the picker without changing anything. |
 
