@@ -63,7 +63,7 @@ Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's
 
 ## Things to watch on the first runs
 
-- **PA heat:** 110 s key-down is much longer than CW or FT8. Start with a dummy load, low supply voltage (or USB-C) and a low TX %; feel the BS170s after each transmission. Healthy Class E efficiency matters (see `TROUBLESHOOTING.md`).
+- **PA heat:** 110 s key-down is much longer than CW or FT8. Start with a dummy load, low supply voltage (or USB-C) and a low TX %; feel the BS170s after each transmission for testing. Healthy Class E efficiency matters (see `TROUBLESHOOTING.md`).
 - **Sidetone:** the CW sidetone sounds for the whole transmission. Set 2.3 CW Side Vol to −1 to mute it.
 - **Frequency:** check the tones land where expected with another receiver running WSJT-X (dial 14.0956 USB, signal at ~1500 Hz audio). An offset of tens of Hz means the Si5351 reference (8.3 Ref freq) needs calibrating; it is still inside the 200 Hz window.
 
