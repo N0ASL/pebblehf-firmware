@@ -106,7 +106,7 @@ Most field problems are a setting or a button habit, not a fault. The start-up s
 | --- | --- |
 | SELECT seems slow to react | A single press waits a moment to see whether a second click follows. Normal. |
 | Preset picker opened by accident | MENU leaves it without changing anything. |
-| "WSPR: bad call" or "WSPR: bad grid" | Fix 5.1 or 5.2. Standard calls only (digit as 2nd or 3rd character, no /P); grid is two letters A to R then two digits. |
+| "Bad WSPR" | The call or grid is empty or not valid; fix 5.1 or 5.2. Standard calls only (digit as 2nd or 3rd character, no /P); grid is two letters A to R then two digits. |
 | Beacon not decoded, or timing looks off | Stop it, click 5.7 and re-sync with SELECT at the start of an even minute. |
 | WSPR tone tens of Hz from where expected | Calibrate 8.3 Ref freq against a known signal. Still inside the 200 Hz WSPR window. |
 | "TX timeout" on the screen | The key or PTT was held past the 3.6 limit. Release it. |

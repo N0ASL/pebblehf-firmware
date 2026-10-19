@@ -4212,7 +4212,7 @@ void wspr_poll(){  // called from loop()
   if(wspr_state == 0){
     if(!wspr_on) return;
     uint8_t r = wspr_encode(wspr_call, wspr_grid, wspr_dbm[wspr_pwr]);  // "WSPR Beacon" switched on in the menu
-    if(r){ wspr_on = 0; wspr_status((r == 1) ? F("WSPR: bad call") : F("WSPR: bad grid")); return; }
+    if(r){ wspr_on = 0; wspr_status(F("Bad WSPR")); return; }  // call or grid does not fit a standard message; 8 characters, so no S-meter mode overwrites it
     wspr_state = 1;
     wspr_status(F("SEL at even min"));
     wspr_line2();
