@@ -4,7 +4,7 @@
 
 ## At a glance
 
-Firmware 1.0.7-N0ASL on the 20 m Pebble HF (14.000–14.350 MHz; USB, LSB, CW). Three controls do everything: the Tuning Knob (turn and press), MENU (left) and SELECT (right).
+Firmware 1.0.7-N0ASL on the 20 m Pebble HF (14.000–14.350 MHz; USB, LSB, CW, FM, AM). Three controls do everything: the Tuning Knob (turn and press), MENU (left) and SELECT (right).
 
 | Control | Action | What it does |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ Power it from 13.8 V for about 5 W, or from USB-C for about 1 W (USB-C carries p
 | Tune | Turn the knob. Short press = bigger step, long press = smaller step (10 MHz down to 1 Hz). Changing mode or VFO sets 1 kHz for SSB and 500 Hz for CW. |
 | Volume | Press and turn the knob, 0 to 16. |
 | Filter width | Double-click SELECT. SSB: Full, 3000, 2400, 1800 Hz. CW: 500, 200, 100, 50 Hz. |
-| Mode | Menu 1.2: LSB, USB or CW. SELECT does not change mode in this build. USB is the normal voice mode on 20 m. |
+| Mode | Menu 1.2: LSB, USB, CW, FM or AM. SELECT does not change mode in this build. USB is the normal voice mode on 20 m. |
 | RIT | Long press SELECT; the step drops to 10 Hz. Long press again to turn RIT off and swap VFOs. |
 | Digital modes | External USB sound card. Menu 3.1 VOX on, 3.2 Noise Gate 50. For a first test, turn 2.8 Practice on so nothing is transmitted. |
 
