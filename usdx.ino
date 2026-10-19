@@ -4412,7 +4412,7 @@ uint8_t preset_pick = 0;  // 1 while the picker is open (Select short press in t
 uint32_t preset_get(uint8_t i){  // 0 = empty slot
   uint32_t v = eeprom_read_dword((const uint32_t *)(PRESET_EEPROM + 4 * i));
   uint32_t f = v & 0xFFFFFFUL;
-  if((f < FREQ_LIMIT_LOW) || (f > FREQ_LIMIT_HIGH) || ((v >> 24) > CW)) v = pgm_read_dword(&preset_default[i]);
+  if((f < FREQ_LIMIT_LOW) || (f > FREQ_LIMIT_HIGH) || ((v >> 24) > AM)) v = pgm_read_dword(&preset_default[i]);
   return v;
 }
 

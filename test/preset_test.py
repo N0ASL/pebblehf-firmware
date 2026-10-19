@@ -3,8 +3,8 @@
 
 Extracts the block between "FREQ_PRESETS_BEGIN" and "FREQ_PRESETS_END", compiles it for the PC with a fake EEPROM and a
 16x2 LCD model, and checks: factory slots and empty slots, a stored slot, damaged slots falling back, the EEPROM area
-limits, the picker screen (hint line, A/B letter, slot text, empty slot, column 15 left alone for the T/R indicator),
-and storing the active VFO's frequency and mode.
+limits, the picker screen (hint line, small a/b VFO glyph, slot text, empty slot, column 15 left alone for the T/R indicator),
+and storing the active VFO's frequency and mode (all five modes, AM and FM included).
 
 Usage:  python3 test/preset_test.py [path/to/usdx.ino]
 Needs:  g++ (or c++) on the PATH.
@@ -34,7 +34,7 @@ struct Lcd { char scr[2][17]; int r = 0, c = 0;
   Lcd(){ memset(scr, ' ', sizeof(scr)); scr[0][16] = scr[1][16] = 0; }
   void noCursor(){}
   void setCursor(int cc, int rr){ c = cc; r = rr; }
-  void put(char ch){ if(c < 16) scr[r][c] = ch; c++; }
+  void put(char ch){ if(ch == 6) ch = 'a'; if(ch == 7) ch = 'b'; if(c < 16) scr[r][c] = ch; c++; }  // custom glyphs 6/7: small a/b
   void print(const char* t){ for(; *t; t++) put(*t); }
   void print(char ch){ put(ch); }
   void print(unsigned long v){ print(std::to_string(v).c_str()); } void print(unsigned int v){ print((unsigned long)v); }
@@ -55,6 +55,10 @@ int main(){
   eeprom_write_dword((uint32_t*)(PRESET_EEPROM + 4 * 2), 7030000UL | ((uint32_t)CW << 24));
   CHECK(preset_get(2) == (14100000UL | ((uint32_t)CW << 24)), "out-of-band slot falls back to the default");
   eeprom_write_dword((uint32_t*)(PRESET_EEPROM + 4 * 2), 14123400UL | ((uint32_t)AM << 24));
+  CHECK(preset_get(2) == (14123400UL | ((uint32_t)AM << 24)), "AM slot is returned");
+  eeprom_write_dword((uint32_t*)(PRESET_EEPROM + 4 * 2), 14123400UL | ((uint32_t)FM << 24));
+  CHECK(preset_get(2) == (14123400UL | ((uint32_t)FM << 24)), "FM slot is returned");
+  eeprom_write_dword((uint32_t*)(PRESET_EEPROM + 4 * 2), 14123400UL | ((uint32_t)(AM + 1) << 24));
   CHECK(preset_get(2) == (14100000UL | ((uint32_t)CW << 24)), "bad mode falls back to the default");
   eeprom_write_dword((uint32_t*)(PRESET_EEPROM + 4 * 6), 7030000UL | ((uint32_t)CW << 24));
   CHECK(preset_get(6) == 0, "damaged empty slot stays empty");
@@ -73,6 +77,9 @@ int main(){
   freq = 14123400; mode = USB; mark(); preset_store();
   CHECK(preset_get(5) == (14123400UL | ((uint32_t)USB << 24)), "store: slot 6 holds the VFO's frequency and mode");
   printf("after store '%%s'\n", lcd.scr[1]);
+  freq = 14286000; mode = AM; preset_sel = 6; preset_store();
+  CHECK(preset_get(6) == (14286000UL | ((uint32_t)AM << 24)), "store: AM is kept (was lost before)");
+  printf("after AM store '%%s'\n", lcd.scr[1]);
   printf("bad %%d\n", bad);
   return bad != 0;
 }
@@ -90,8 +97,8 @@ def main():
     r = subprocess.run([exe], capture_output=True, text=True)
     out = r.stdout; print(out, end="")
     want = ["14.0300 CW", "14.2855 USB", "14.0001 USB", "14.0000 LSB",
-            "top 'KNOB=go SEL=save'", "slot 1 VFO A 'A1 14.0300 CW  T'", "slot 6 VFO B 'B6 empty       T'",
-            "after store 'B6 14.1234 USB T'", "bad 0"]
+            "top 'KNOB=go SEL=save'", "slot 1 VFO A 'a1 14.0300 CW  T'", "slot 6 VFO B 'b6 empty       T'",
+            "after store 'b6 14.1234 USB T'", "after AM store 'b7 14.2860 AM  T'", "bad 0"]
     lines = out.split("\n")
     missing = [w for w in want if w not in lines]
     for w in missing: print("FAIL: expected line:", repr(w))
