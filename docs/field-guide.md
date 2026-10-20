@@ -81,7 +81,7 @@ For a short test, set 5.6 Max TX to 1 to 3 so the beacon stops by itself and sho
 
 Each test run:
 
-1. Click 5.7 WSPR Beacon. The menu closes and the top line shows "SEL at even min".
+1. Click 5.7 WSPR Beacon. This only arms the beacon: the menu closes, the top line shows "SEL at even min", and nothing transmits until you sync in the next step.
 2. Watch a clock and click SELECT the moment an even minute starts (for example 14:32:00). The moment the button goes down is used.
 3. The first transmission starts 1 s later and lasts about 110 s. The top line counts down ("WSPR TX 110s 5%"), then shows the wait until the next one ("WSPR TX in 5:21").
 4. To stop, click MENU, SELECT or the Tuning Knob. PTT stops a transmission in progress, unless VOX (3.1) is on.

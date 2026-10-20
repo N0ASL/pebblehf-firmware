@@ -28,7 +28,7 @@ Your saved settings and calibration (Ref freq, IQ phase, PA bias, VFOs) survive 
 
 ## Using it
 
-Menu entries (section 5): **5.0 WSPR Menu** ("click to open") opens a list of 5.1–5.7 that scrolls round. SELECT goes back to the main list; clicking 5.7 Beacon starts the beacon and closes the menu.
+Menu entries (section 5): **5.0 WSPR Menu** ("click to open") opens a list of 5.1–5.7 that scrolls round. SELECT goes back to the main list; clicking 5.7 Beacon arms the beacon and closes the menu. Nothing transmits yet: the radio waits for you to click SELECT at the start of an even minute, and the first transmission starts 1 s after that click.
 
 
 | Menu | Values | Notes |
@@ -39,7 +39,7 @@ Menu entries (section 5): **5.0 WSPR Menu** ("click to open") opens a list of 5.
 | 5.4 WSPR TX % | 5% / 10% / 25% / 50% | share of the 2-minute slots used for transmitting, the same idea as WSJT-X's Tx Pct; default 10 %. The menu shows only the percentage because the gaps are random (see below). A saved choice from an older build is read by position, so check this setting after updating |
 | 5.5 WSPR Offset | −90 … +90 Hz in 10 Hz steps, or Random | shifts the signal inside the 200 Hz WSPR window (random: new value every transmission); default 0 Hz |
 | 5.6 WSPR Max TX | No limit / 1 / 2 / 3 / 5 / 10 TX | the beacon stops after that many transmissions, shows `WSPR done` and returns to the normal screen |
-| 5.7 WSPR Beacon | click to start | starts the beacon and closes the menu; the beacon is always off at power-up |
+| 5.7 WSPR Beacon | click to start | arms the beacon and closes the menu; it does not transmit until you click SELECT at the start of an even minute; the beacon is always off at power-up |
 
 Buttons are named as on the Pebble HF: **MENU** (left), **SELECT** (right), the **VFO knob** (turn and click) and the **PTT** key. Text entry uses the firmware's string editor: turn the VFO knob to change a character, click the VFO knob to move to the next character, MENU to save and return to the main screen (SELECT saves and returns to the menu list). For the call the characters are limited to space, 0–9 and A–Z, in that order, wrapping around (turning down from a blank gives Z, Y, X…). The grid only offers what a grid square can contain: letters A–R in the first two positions and digits 0–9 in the last two, each wrapping around; on the first turn the field fills with AA00 so it is always valid. The cursor stops at the last position (6th for the call, 4th for the grid).
 

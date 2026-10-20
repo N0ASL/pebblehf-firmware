@@ -4,7 +4,7 @@
 
 ## Changes from the official 1.0.7 firmware
 
-WSPR beacon (`WSPR_BEACON`): stand-alone beacon on 14.097 MHz. Menu 5.0 WSPR Menu opens 5.1 Call, 5.2 Grid, 5.3 Power, 5.4 TX %, 5.5 Offset (-90 to +90 Hz or Random), 5.6 Max TX and 5.7 Beacon. Manual sync with SELECT on an even minute; the display shows only beacon data; any button or PTT stops it; clicking 5.7 starts it and closes the menu; `WSPR done` after the last transmission. See [wspr-beacon.md](wspr-beacon.md).
+WSPR beacon (`WSPR_BEACON`): stand-alone beacon on 14.097 MHz. Menu 5.0 WSPR Menu opens 5.1 Call, 5.2 Grid, 5.3 Power, 5.4 TX %, 5.5 Offset (-90 to +90 Hz or Random), 5.6 Max TX and 5.7 Beacon. Manual sync with SELECT on an even minute; the display shows only beacon data; any button or PTT stops it; clicking 5.7 arms it and closes the menu (it transmits only after the SELECT sync click); `WSPR done` after the last transmission. See [wspr-beacon.md](wspr-beacon.md).
 
 Presets (`FREQ_PRESETS`): 8 saved frequencies and modes (LSB, USB, CW, FM or AM), picker opened by SELECT or menu 1.14; double-click of the Tuning Knob swaps VFO A/B; both the swap and a jump to a preset turn RIT off. The picker marks the active VFO with the same small a/b as the main screen. See [presets.md](presets.md).
 
