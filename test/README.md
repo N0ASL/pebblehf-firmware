@@ -13,7 +13,7 @@ Each script pulls a marked block of code out of `usdx.ino`, compiles it on your 
 
 ## Running them
 
-They run the same way on Linux, macOS or Windows: you need Python 3 and a C++ compiler (`g++` or `c++`) on the PATH. On a Mac the compiler comes with Apple's command line developer tools. From the repository root:
+You need Python 3 and a C++ compiler (`g++` or `c++`) on the PATH. From the repository root:
 
 ```
 python3 test/wspr_encoder_test.py
