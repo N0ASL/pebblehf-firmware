@@ -9,7 +9,7 @@ An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland
 
 ## What's added
 
-- **WSPR beacon:** WSPR menu for call, grid, power, TX % and max TX; sync on the even minute. See [docs/wspr-beacon.md](docs/wspr-beacon.md).
+- **WSPR beacon:** a stand-alone beacon that runs entirely in the radio, with no computer or GPS needed. Set your call, grid, power, TX % and max TX in the WSPR menu, then sync it by hand by clicking SELECT at the start of an even minute, using any clock you trust, such as a phone. See [docs/wspr-beacon.md](docs/wspr-beacon.md).
 - **Frequency presets:** 8 slots, Select opens the picker, plus A/B swap with a Tuning Knob double click. See [docs/presets.md](docs/presets.md).
 - **TX Timeout:** menu 3.6, for manual key or PTT.
 - **Menu wrap:** the menu scrolls round.
