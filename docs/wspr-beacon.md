@@ -2,6 +2,12 @@
 
 Status (19 Oct 2026): **decoded on the air (WSJT-X); everything in the beacon has been tried on the radio: the WSPR menu, offset, max TX, click-to-start 5.7, the call and grid check ("Bad WSPR"), the plain TX % and WSJT-X power labels, and PTT being ignored with VOX on.**
 
+On 19 Oct 2026 the beacon ran at about 4 W from an 11 V supply and about 0.8 W on USB-C (5 V), into a 20 m whip with a Wolf River Coil-style loading, and was spotted on WSPRnet across the US and Canada, from the West Coast to New England and Florida.
+
+![WSPRnet map of stations that spotted the beacon on 19 Oct 2026](images/wspr-map-2026-10-19.jpg)
+
+*WSPRnet map of the stations that spotted the beacon on 19 Oct 2026 (one day, one antenna and one set of band conditions, so a report of what happened and not a promise of what you will get).*
+
 > **Heat and power.** The beacon keys the PA continuously for about 110 s per transmission, much longer than CW or FT8, and the PA has no heatsink. Keep it to short, attended tests: use a low TX %, set Max TX to a few transmissions, and let the PA cool between runs. To cut heat, lower the supply voltage (about 1 W on USB-C against about 5 W on 13.8 V). The WSPR Power setting (5.3) only changes the number sent in the message, and TX Drive (3.3) does not change the beacon's output. Use at your own risk; this firmware is provided as is under the MIT license.
 
 A stand-alone WSPR beacon inside the Pebble HF firmware: no Pico, phone or computer attached. It sends a standard WSPR message (callsign, 4-character grid, power) on one fixed frequency in the 20 m WSPR window.
