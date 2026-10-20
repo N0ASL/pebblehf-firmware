@@ -66,7 +66,7 @@ The picker does not open inside a menu or while the WSPR beacon is running.
 
 Set your call, grid and power once, start the beacon, then click SELECT at the start of an even minute. Check the signal on a second receiver running WSJT-X (dial 14.0956 MHz USB; the signal sits near 1500 Hz audio).
 
-For an idea of what to expect: on 19 Oct 2026 the beacon ran at about 4 W from 11 V and about 0.8 W on USB-C into a 20 m whip, and was spotted on WSPRnet across the US and Canada. The map is in [`wspr-beacon.md`](wspr-beacon.md).
+For an idea of what to expect: on 19 Oct 2026 the beacon ran at about 4 W from 11 V and about 0.8 W on USB-C into a 20 m whip, and was spotted on WSPRnet by at least 233 stations across the US, Canada and Alaska. The map is in [`wspr-beacon.md`](wspr-beacon.md).
 
 One-time setup in menu 5.0 WSPR Menu (click to open); the settings are saved:
 

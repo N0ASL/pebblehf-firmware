@@ -2,7 +2,7 @@
 
 Status (19 Oct 2026): **decoded on the air (WSJT-X); everything in the beacon has been tried on the radio: the WSPR menu, offset, max TX, click-to-start 5.7, the call and grid check ("Bad WSPR"), the plain TX % and WSJT-X power labels, and PTT being ignored with VOX on.**
 
-On 19 Oct 2026 the beacon ran at about 4 W from an 11 V supply and about 0.8 W on USB-C (5 V), into a 20 m whip with a Wolf River Coil-style loading, and was spotted on WSPRnet across the US and Canada, from the West Coast to New England and Florida.
+On 19 Oct 2026 (18:46 to 19:52 UTC) the beacon ran at about 4 W from an 11 V supply and about 0.8 W on USB-C (5 V), into a 20 m whip with a Wolf River Coil-style loading. WSPRnet logged 500 spots from 233 different stations, probably capped by the export limit, so treat those as minimums. They came from the West Coast to New England and Florida and included 19 Canadian stations and Alaska, the farthest at about 4,000 km. The nearest spot was 824 km away and the median about 1,800 km. Reports ran from +18 dB to -33 dB (median -16 dB), and 488 of the 500 showed no drift (the rest ±1 Hz/min).
 
 ![WSPRnet map of stations that spotted the beacon on 19 Oct 2026](images/wspr-map-2026-10-19.jpg)
 
