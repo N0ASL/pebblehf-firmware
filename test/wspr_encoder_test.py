@@ -2,7 +2,7 @@
 """Host test for the WSPR encoder in usdx.ino.
 
 Extracts the block between "WSPR_ENCODER_BEGIN" and "WSPR_ENCODER_END" from
-usdx.ino, compiles it for the PC with small shims for the AVR-only names, and
+usdx.ino, compiles it for the host computer with small shims for the AVR-only names, and
 compares its 162 channel symbols with a reference encoder written in Python.
 
 The reference is the encoder from N0ASL's KH1/Pico project (wspr_tx.py), which

@@ -76,7 +76,7 @@ Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's
 - **Sidetone:** the CW sidetone sounds for the whole transmission. Set 2.3 CW Side Vol to −1 to mute it.
 - **Frequency:** check the tones land where expected with another receiver running WSJT-X (dial 14.0956 USB, signal at ~1500 Hz audio). An offset of tens of Hz means the Si5351 reference (8.3 Ref freq) needs calibrating; it is still inside the 200 Hz window.
 
-## Tests (run on a PC)
+## Tests (run on the host computer)
 
 - `python3 test/wspr_encoder_test.py` — compiles the encoder block from `usdx.ino` and compares its 162 symbols with a reference encoder (the KH1 project's, verified against WSJT-X) on 2,000 messages, plus 10 invalid inputs that must be rejected. Also matches the published start of the `K1ABC FN42 37` test vector.
 - `python3 test/wspr_beacon_sim.py` — runs the beacon code against a simulated clock: start 1.000 s after the sync press, 110.592 s on air, slot choice (each TX % measured over 200,000 picks, never two slots in a row), every tone value and time, stop on a button press, refusal of a bad callsign, and the countdown text on a simulated 16x2 display (checked every 5 s against the real time left).

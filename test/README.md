@@ -1,8 +1,8 @@
-# PC-side checks for the added code
+# Host-side checks for the added code
 
 These are the fork author's own checks of the code this fork adds to `usdx.ino`. You do not need them to build, flash or use the firmware.
 
-Each script pulls a marked block of code out of `usdx.ino`, compiles it on a PC with stand-ins for the hardware (a simulated clock, EEPROM and LCD), and checks the result. They only work with this firmware's code.
+Each script pulls a marked block of code out of `usdx.ino`, compiles it on your own computer (the "host", as opposed to the radio) with stand-ins for the hardware (a simulated clock, EEPROM and LCD), and checks the result. They only work with this firmware's code.
 
 | Script | What it checks |
 |---|---|
@@ -13,7 +13,7 @@ Each script pulls a marked block of code out of `usdx.ino`, compiles it on a PC 
 
 ## Running them
 
-You need Python 3 and a C++ compiler (`g++` or `c++`) on the PATH. From the repository root:
+They run the same way on Linux, macOS or Windows: you need Python 3 and a C++ compiler (`g++` or `c++`) on the PATH. On a Mac the compiler comes with Apple's command line developer tools. From the repository root:
 
 ```
 python3 test/wspr_encoder_test.py

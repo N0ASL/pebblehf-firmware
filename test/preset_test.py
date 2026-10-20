@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Host test for the frequency-preset code in usdx.ino (FREQ_PRESETS).
 
-Extracts the block between "FREQ_PRESETS_BEGIN" and "FREQ_PRESETS_END", compiles it for the PC with a fake EEPROM and a
+Extracts the block between "FREQ_PRESETS_BEGIN" and "FREQ_PRESETS_END", compiles it for the host computer with a fake EEPROM and a
 16x2 LCD model, and checks: factory slots and empty slots, a stored slot, damaged slots falling back, the EEPROM area
 limits, the picker screen (hint line, small a/b VFO glyph, slot text, empty slot, column 15 left alone for the T/R indicator),
 and storing the active VFO's frequency and mode (all five modes, AM and FM included).

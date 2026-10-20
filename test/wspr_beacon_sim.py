@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Host simulation of the WSPR beacon in usdx.ino (WSPR_BEACON).
 
-Extracts the encoder and beacon code from usdx.ino, compiles it for the PC
+Extracts the encoder and beacon code from usdx.ino, compiles it for the host computer
 with a simulated millis() clock and stand-ins for the LCD, Si5351 and
 switch_rxtx(), and checks: start 1 s after the sync press, 110.592 s on air,
 the slot choice (TX %, never back to back), every tone value and its timing, stop on a button
