@@ -20,6 +20,14 @@ Status (19 Oct 2026): everything listed above has been tried on a V2.5 20 m radi
 
 Size of the default build: 31,702 bytes of flash (98 %), 1,211 bytes RAM, 837 bytes left for the stack.
 
+## Beacon-only build with DIAG on
+
+To keep the start-up self-test (`DIAG`) and try the WSPR beacon on its own, build with only `WSPR_BEACON` and `DIAG` switched on (`FREQ_PRESETS`, `TX_TIMEOUT` and `MENU_WRAP` off). That comes to about 30.7 KB of the 32,256-byte limit (compiled, not flashed on a radio). The full set of this fork's features plus `DIAG` does not fit in the flash.
+
+## Updating from upstream
+
+`git fetch upstream && git merge upstream/main`
+
 ## Building
 
 Arduino IDE or arduino-cli, board "Arduino Uno" (ATmega328P). The Arduino IDE wants the sketch folder named like the file, so put `usdx.ino` in a folder called `usdx`. Program with an ISP programmer (see `PROGRAMMING.md`); there is no bootloader.

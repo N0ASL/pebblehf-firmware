@@ -1,26 +1,34 @@
-> **This is N0ASL's fork of the Pebble HF firmware** ([mspiceland/usdx-pebblehf](https://github.com/mspiceland/usdx-pebblehf)).
-> It tracks N4FFF's releases (currently **1.0.7**) and adds optional features behind build switches. By default the WSPR beacon is **on** and the startup self-test (`DIAG`) is **off**; to get the official firmware back, comment out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and uncomment `DIAG` (then the build is identical to the official one).
->
-> **Want the start-up self-test (`DIAG`) too? You can keep it and try the WSPR beacon on its own: build with only the WSPR beacon switched on and `DIAG` switched on. That build comes to about 30.7 KB, under the 32,256-byte limit. The full set of added features plus `DIAG` doesn't fit in the flash.**
->
-> | Addition | Switch | Status |
-> |---|---|---|
-> | Frequency presets (8 slots; Select opens the picker, Tuning Knob = go, Select = store) and A/B swap (Tuning Knob double click) | `FREQ_PRESETS` | on by default, tried on the radio; see [`docs/presets.md`](docs/presets.md) |
-> | Stand-alone WSPR beacon (WSPR menu: call/grid/power/TX %/offset/max TX, manual sync on the even minute) | `WSPR_BEACON` | **WARNING: the beacon keys the PA for about 110 s per transmission and the PA has no heatsink. Keep tests short and attended, with a low TX % and a small Max TX, and read the heat and power note in [`docs/wspr-beacon.md`](docs/wspr-beacon.md) first.** On by default, decoded on the air. |
-> | TX Timeout (menu 3.6: Off, 1, 2, 3, 5, 10 min) for manual key/PTT transmit | `TX_TIMEOUT` | on by default, tried on the radio |
-> | Menu scrolls round (last item to first and back) | `MENU_WRAP` | on by default |
-> | `-N0ASL` version tag; start-up self-test (`DIAG`) off | `VERSION_TAG`, `DIAG` | full list of changes: [`docs/firmware.md`](docs/firmware.md#changes-from-the-official-107-firmware) |
->
-> | ▶️ **Video walkthrough** of the fork's additions |
-> |---|
-> | <a href="https://youtu.be/kMhRi84KVA4"><img src="https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg" width="200" alt="Pebble HF firmware additions on YouTube"></a><br>[Pebble HF firmware additions on YouTube](https://youtu.be/kMhRi84KVA4) |
->
-> Fork notes: [`docs/firmware.md`](docs/firmware.md) (building, flash/RAM sizes, built-in optional switches), [`docs/hardware-notes.md`](docs/hardware-notes.md) (V2.5 board notes, CAT over the LCD lines; Pico interface parked).
-> Update from upstream: `git fetch upstream && git merge upstream/main`.
->
-> Credits: Pebble HF hardware by Barbaros Asuroglu WB2CBA; Pebble HF firmware by Mike N4FFF (project with Becky N4BKY); original uSDX by Guido PE1NNZ. MIT license, see [`LICENSE`](LICENSE).
+# Pebble HF firmware: N0ASL fork
+
+An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland/usdx-pebblehf), currently tracking 1.0.7. It adds a stand-alone WSPR beacon, frequency presets, a TX timeout and menu wrap, each behind its own build switch. 20 m only, tried on a Pebble HF V2.5.
+
+**[Download the ready-to-flash hex](https://github.com/N0ASL/pebblehf-firmware/releases/latest)** (plain hex, no bootloader; flashing steps are in [PROGRAMMING.md](PROGRAMMING.md))
+
+[![Pebble HF firmware additions on YouTube](https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg)](https://youtu.be/kMhRi84KVA4)
+[Video walkthrough of the additions](https://youtu.be/kMhRi84KVA4)
+
+## What's added
+
+- **WSPR beacon:** WSPR menu for call, grid, power, TX % and max TX; sync on the even minute. See [docs/wspr-beacon.md](docs/wspr-beacon.md).
+- **Frequency presets:** 8 slots, Select opens the picker, plus A/B swap with a Tuning Knob double click. See [docs/presets.md](docs/presets.md).
+- **TX Timeout:** menu 3.6, for manual key or PTT.
+- **Menu wrap:** the menu scrolls round.
+
+> [!WARNING]
+> The beacon keys the PA for about 110 seconds per transmission and the PA has no heatsink. Keep tests short and attended, with a low TX % and a small Max TX, and read the heat and power note in [docs/wspr-beacon.md](docs/wspr-beacon.md) first.
+
+## Building and options
+
+Everything above is on by default, and the start-up self-test (`DIAG`) is off to make room. Each feature can be switched off in `usdx.ino`; with all of them off and `DIAG` on, the build is identical to the official firmware. You can also keep `DIAG` and run the WSPR beacon on its own (about 30.7 KB). Sizes, switches and the full change list are in [docs/firmware.md](docs/firmware.md). A tentative operating guide is in [docs/field-guide.md](docs/field-guide.md).
+
+Credits: Pebble HF hardware by Barbaros Asuroglu WB2CBA; firmware by Mike N4FFF (with Becky N4BKY); original uSDX by Guido PE1NNZ. MIT license, see [LICENSE](LICENSE).
 
 ---
+
+# About the Pebble HF (upstream README)
+
+The rest of this page is the upstream project's README.
+
 
 # Pebble HF: An Ultra-Affordable HF Radio for Everyone
 
