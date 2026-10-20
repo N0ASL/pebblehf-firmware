@@ -14,7 +14,7 @@ An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland
 - **TX Timeout:** menu 3.6, for manual key or PTT.
 - **Menu wrap:** the menu scrolls round.
 
-**On the air:** on 19 Oct 2026 the beacon was spotted on WSPRnet by at least 233 stations in about an hour, from the West Coast to New England and out to Alaska (about 4,000 km), at about 4 W from 11 V and about 0.8 W on USB-C, into a 20 m whip. One day on one antenna, so a report of what happened and not a promise. See the [map and numbers](docs/wspr-beacon.md).
+**On the air:** on 19 Oct 2026 the beacon was spotted on WSPRnet by at least 233 stations in about an hour, from the West Coast to New England and out to Alaska (about 4,000 km), at about 4 W from 11 V and about 0.5 W on USB-C, into a 20 m whip. One day on one antenna, so a report of what happened and not a promise. See the [map and numbers](docs/wspr-beacon.md).
 
 > [!WARNING]
 > The beacon keys the PA for about 110 seconds per transmission and the PA has no heatsink. Keep tests short and attended, with a low TX % and a small Max TX, and read the heat and power note in [docs/wspr-beacon.md](docs/wspr-beacon.md) first.
