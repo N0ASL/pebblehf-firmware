@@ -2,7 +2,7 @@
 
 An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland/usdx-pebblehf), currently tracking 1.0.7. It adds a stand-alone WSPR beacon, frequency presets, a TX timeout and menu wrap, each behind its own build switch. 20 m only, tried on a Pebble HF V2.5.
 
-**[Download the ready-to-flash hex](https://github.com/N0ASL/pebblehf-firmware/releases/latest)** (plain hex, no bootloader; flashing steps are in [PROGRAMMING.md](PROGRAMMING.md))
+**[Download the ready-to-flash hex](https://github.com/N0ASL/pebblehf-firmware/releases/latest)** (plain hex, no bootloader; flash it the way you would any Pebble HF firmware, and if you use the web updater, choose "Upload my own .hex file")
 
 [![Pebble HF firmware additions on YouTube](https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg)](https://youtu.be/kMhRi84KVA4)
 [Video walkthrough of the additions](https://youtu.be/kMhRi84KVA4)
