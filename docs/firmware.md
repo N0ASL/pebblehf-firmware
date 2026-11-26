@@ -20,6 +20,8 @@ Status (19 Oct 2026): everything listed above has been tried on a V2.5 20 m radi
 
 Status (25 Nov 2026): the move to 1.0.8 and the per-band WSPR frequency and presets are built and host-tested only. The 20 m build's hex differs from the tried 1.0.7-N0ASL release only in the version text and the initial value of `freq` (from 1.0.8). The 40 m and other band builds have not been on a radio.
 
+Status (25 Nov 2026, evening): the 20 m 1.0.8-N0ASL hex was flashed on the V2.5. Version screen, tuning and receive, presets and A/B swap checked. The beacon was not re-run on air (20 m was closed at night); its code and 20 m frequency are unchanged from the October on-air test.
+
 Size of the default build: 31,702 bytes of flash (98 %), 1,211 bytes RAM, 837 bytes left for the stack. 40 m: 31,700; 30 m: 31,702; 17, 15 and 12 m: 31,628; 10 m: 31,624 (the bands with empty preset slots come out slightly smaller).
 
 ## Beacon-only build with DIAG on
