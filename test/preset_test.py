@@ -4,7 +4,8 @@
 Extracts the block between "FREQ_PRESETS_BEGIN" and "FREQ_PRESETS_END", compiles it for the host computer with a fake EEPROM and a
 16x2 LCD model, and checks: factory slots and empty slots, a stored slot, damaged slots falling back, the EEPROM area
 limits, the picker screen (hint line, small a/b VFO glyph, slot text, empty slot, column 15 left alone for the T/R indicator),
-and storing the active VFO's frequency and mode (all five modes, AM and FM included).
+and storing the active VFO's frequency and mode (all five modes, AM and FM included). Then, for the band builds (BAND_40M and
+BAND_10M), the factory slots of that band and a 20m slot left in EEPROM falling back to them.
 
 Usage:  python3 test/preset_test.py [path/to/usdx.ino]
 Needs:  g++ (or c++) on the PATH.
@@ -85,6 +86,40 @@ int main(){
 }
 '''
 
+BAND_SHIM = r'''
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
+#define FREQ_PRESETS 1
+#define PROGMEM
+#define F(s) s
+#define pgm_read_dword(p) (*(const uint32_t*)(p))
+enum { LSB, USB, CW, FM, AM };
+const char* mode_label[5] = { "LSB", "USB", "CW ", "FM ", "AM " };
+static uint8_t eep[1024];
+uint32_t eeprom_read_dword(const uint32_t* a){ uint32_t v; memcpy(&v, eep + (uintptr_t)a, 4); return v; }
+void eeprom_write_dword(uint32_t* a, uint32_t v){ memcpy(eep + (uintptr_t)a, &v, 4); }
+void wdt_reset(){}
+void delay(int){}
+volatile int32_t freq = 0; volatile uint8_t mode = USB, vfosel = 0;
+struct Lcd { void noCursor(){} void setCursor(int, int){} void print(const char*){} void print(char){} void print(unsigned long){}
+  void print(unsigned int){} void print(int){} void print(long){} } lcd;
+%s
+int main(){
+  memset(eep, 0xFF, sizeof(eep));
+  for(int i = 0; i != N_PRESET; i++){ uint32_t v = preset_get(i); printf("slot %%d %%lu %%d\n", i + 1, (unsigned long)(v & 0xFFFFFFUL), (int)(v >> 24)); }
+  eeprom_write_dword((uint32_t*)(PRESET_EEPROM + 4 * 0), 14123400UL | ((uint32_t)USB << 24));  // left over from a 20m build
+  uint32_t v = preset_get(0); printf("20m leftover %%lu %%d\n", (unsigned long)(v & 0xFFFFFFUL), (int)(v >> 24));
+  return 0;
+}
+'''
+
+def band_check(block, band, lo, hi):
+    d = tempfile.mkdtemp(); c = os.path.join(d, "b.cpp"); exe = os.path.join(d, "b")
+    open(c, "w").write(BAND_SHIM % block)
+    subprocess.check_call(["c++", "-O1", "-w", "-D" + band, "-DFREQ_LIMIT_LOW=%dUL" % lo, "-DFREQ_LIMIT_HIGH=%dUL" % hi, "-o", exe, c])
+    return subprocess.run([exe], capture_output=True, text=True).stdout.split("\n")
+
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
     ino = sys.argv[1] if len(sys.argv) > 1 else os.path.join(here, "..", "usdx.ino")
@@ -102,6 +137,16 @@ def main():
     lines = out.split("\n")
     missing = [w for w in want if w not in lines]
     for w in missing: print("FAIL: expected line:", repr(w))
+    # LSB=0 USB=1 CW=2
+    bands = [("BAND_40M", 7000000, 7300000, ["slot 1 7030000 2", "slot 2 7040000 2", "slot 3 7074000 1", "slot 4 7200000 0",
+                                             "slot 5 7285000 0", "slot 6 0 0", "slot 8 0 0", "20m leftover 7030000 2"]),
+             ("BAND_10M", 28000000, 29700000, ["slot 1 0 0", "slot 5 0 0", "slot 8 0 0", "20m leftover 0 0"])]
+    for band, lo, hi, exp in bands:
+        got = band_check(m.group(1), band, lo, hi)
+        miss = [w for w in exp if w not in got]
+        for w in miss: print("FAIL (%s): expected line:" % band, repr(w))
+        if not miss: print("%s factory slots OK" % band)
+        missing += miss
     ok = r.returncode == 0 and not missing
     print("PASS" if ok else "FAILED"); sys.exit(0 if ok else 1)
 

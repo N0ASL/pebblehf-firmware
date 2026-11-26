@@ -65,7 +65,7 @@
 //#define CW_MESSAGE_EXT 1   // Additional CW messages
 #define TX_TIMEOUT     1   // Menu 3.6 TX Timeout: Off/1/2/3/5/10 min; stops a key or PTT that is held too long (not the WSPR beacon)
 #define MENU_WRAP      1   // Menu scrolls round: past the last item comes the first and the other way
-#define FREQ_PRESETS   1   // Frequency presets (menu 1.14 Preset, 1.15 Preset Save): step through saved 20m frequencies/modes, store the current one
+#define FREQ_PRESETS   1   // Frequency presets (menu 1.14 Preset, 1.15 Preset Save): step through saved frequencies/modes, store the current one
 #define WSPR_BEACON    1   // Stand-alone WSPR beacon (menu 5.1-5.5): callsign, grid, power, TX %; sync by clicking SELECT (right button) on an even minute
 //#define TX_DELAY       1   // Enables a delay in the actual transmission to allow relay-switching to be completed before the power is applied (see also NTX, PTX definitions below for GPIO that can switch relay/PA)
 //#define NTX            11  // Enables LOW  on TX, used as PTT out to enable external PAs (a value of 11 means PB3 is used)
@@ -4173,7 +4173,23 @@ inline uint8_t wspr_symbol(uint8_t k){  // channel symbol 0..3
 // Beacon. Time base: millis() counts F_MCU/16 MHz too fast (core built for 16 MHz, crystal is F_MCU), so real
 // milliseconds are converted with WSPR_U(). All schedule times are millis() values; compare them by signed difference.
 #define WSPR_U(ms)  ((uint32_t)(ms) * (F_MCU / 16000) / 1000)    // real ms -> millis() units (ms <= 3.4e6 for F_MCU 20M)
-#define WSPR_FREQ   14097098UL  // tone 0 in Hz; the four tones span 14 097 098-14 097 102.4 Hz, centred in the 14.0970-14.0972 MHz WSPR window
+// WSPR_FREQ: tone 0 in Hz, follows the BAND_xx selection. The four tones span tone 0 to tone 0 + 4.4 Hz, centred in the band's 200 Hz
+// WSPR window (dial frequency + 1400-1600 Hz, as in WSJT-X), so the offset setting (-90 to +90 Hz) stays inside the window.
+#if defined(BAND_40M)
+#define WSPR_FREQ    7040098UL  // 40m: window 7.0400-7.0402 MHz (dial 7.0386)
+#elif defined(BAND_30M)
+#define WSPR_FREQ   10140198UL  // 30m: window 10.1401-10.1403 MHz (dial 10.1387)
+#elif defined(BAND_17M)
+#define WSPR_FREQ   18106098UL  // 17m: window 18.1060-18.1062 MHz (dial 18.1046)
+#elif defined(BAND_15M)
+#define WSPR_FREQ   21096098UL  // 15m: window 21.0960-21.0962 MHz (dial 21.0946)
+#elif defined(BAND_12M)
+#define WSPR_FREQ   24926098UL  // 12m: window 24.9260-24.9262 MHz (dial 24.9246)
+#elif defined(BAND_10M)
+#define WSPR_FREQ   28126098UL  // 10m: window 28.1260-28.1262 MHz (dial 28.1246)
+#else
+#define WSPR_FREQ   14097098UL  // 20m (default): window 14.0970-14.0972 MHz (dial 14.0956)
+#endif
 #define WSPR_EEPROM OWN_EEPROM  // WSPR settings: 12 bytes, then offset, max TX (0x3FC, 0x3FD); 0x3FE is the TX timeout
 
 char wspr_call[7] = "";
@@ -4458,12 +4474,20 @@ const char* mode_label[5] = { "LSB", "USB", "CW ", "FM ", "AM " };
 // --- FREQ_PRESETS_BEGIN (host-tested: test/preset_test.py extracts this block) ---
 #ifdef FREQ_PRESETS
 // Frequency presets: 8 slots of 4 bytes (24-bit frequency in Hz, mode in the top byte) in their own EEPROM area outside the parameter
-// list. A slot that was never stored, or is damaged, reads as its factory value (slots 6-8 have none: 0 = empty).
+// list. A slot that was never stored, is damaged or lies outside the band reads as its factory value (0 = empty). Factory values follow
+// the BAND_xx selection: 20m and 40m have five each (slots 6-8 empty); the other bands start with all slots empty.
 #define N_PRESET 8
 #define PRESET_EEPROM 0x3D0  // 8 x 4 bytes (0x3D0-0x3EF)
 const uint32_t preset_default[N_PRESET] PROGMEM = {
+#if defined(BAND_40M)
+  7030000UL | ((uint32_t)CW << 24), 7040000UL | ((uint32_t)CW << 24), 7074000UL | ((uint32_t)USB << 24),
+  7200000UL | ((uint32_t)LSB << 24), 7285000UL | ((uint32_t)LSB << 24), 0, 0, 0 };
+#elif defined(BAND_30M) || defined(BAND_17M) || defined(BAND_15M) || defined(BAND_12M) || defined(BAND_10M)
+  0, 0, 0, 0, 0, 0, 0, 0 };
+#else  // 20m
   14030000UL | ((uint32_t)CW << 24), 14060000UL | ((uint32_t)CW << 24), 14100000UL | ((uint32_t)CW << 24),
   14250000UL | ((uint32_t)USB << 24), 14285000UL | ((uint32_t)USB << 24), 0, 0, 0 };
+#endif
 uint8_t preset_sel = 0;   // slot shown in the picker (0-based)
 uint8_t preset_pick = 0;  // 1 while the picker is open (Select short press in the main screen)
 
