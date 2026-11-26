@@ -21,7 +21,7 @@ The switch is on by default, so a plain build of `usdx.ino` is the beacon. Near 
 #define WSPR_BEACON      1   // Stand-alone WSPR beacon ...
 ```
 
-DIAG (the startup self-test) is switched off here to make room; CAT stays off. With `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` commented out and `DIAG` back on, the build is byte-for-byte the official firmware (checked: identical hex).
+DIAG (the startup self-test) is switched off here to make room; CAT stays off. With `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` commented out and `DIAG` back on, the build is byte-for-byte N4FFF's 1.0.7 test release (checked: identical hex).
 
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|

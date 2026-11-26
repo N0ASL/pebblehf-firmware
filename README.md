@@ -1,6 +1,6 @@
 # Pebble HF firmware: N0ASL fork
 
-An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland/usdx-pebblehf), currently tracking 1.0.7. It adds a stand-alone WSPR beacon, frequency presets, a TX timeout and menu wrap, each behind its own build switch. 20 m only, tried on a Pebble HF V2.5.
+An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland/usdx-pebblehf), currently tracking 1.0.7 (N4FFF's v1.0.7-test, a pre-release). It adds a stand-alone WSPR beacon, frequency presets, a TX timeout and menu wrap, each behind its own build switch. 20 m only, tried on a Pebble HF V2.5.
 
 **[Download the ready-to-flash hex](https://github.com/N0ASL/pebblehf-firmware/releases/latest)** (plain hex, no bootloader; flash it the way you would any Pebble HF firmware, and if you use the web updater, choose "Upload my own .hex file")
 
@@ -21,7 +21,7 @@ An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland
 
 ## Building and options
 
-Everything above is on by default, and the start-up self-test (`DIAG`) is off to make room. Each feature can be switched off in `usdx.ino`; with all of them off and `DIAG` on, the build is identical to the official firmware. You can also keep `DIAG` and run the WSPR beacon on its own (about 30.7 KB). Sizes, switches and the full change list are in [docs/firmware.md](docs/firmware.md). A tentative operating guide is in [docs/field-guide.md](docs/field-guide.md).
+Everything above is on by default, and the start-up self-test (`DIAG`) is off to make room. Each feature can be switched off in `usdx.ino`; with all of them off and `DIAG` on, the build is identical to N4FFF's 1.0.7 test release. You can also keep `DIAG` and run the WSPR beacon on its own (about 30.7 KB). Sizes, switches and the full change list are in [docs/firmware.md](docs/firmware.md). A tentative operating guide is in [docs/field-guide.md](docs/field-guide.md).
 
 Credits: Pebble HF hardware by Barbaros Asuroglu WB2CBA; firmware by Mike N4FFF (with Becky N4BKY); original uSDX by Guido PE1NNZ. MIT license, see [LICENSE](LICENSE).
 
