@@ -10,7 +10,7 @@ On 19 Oct 2026 (18:46 to 19:52 UTC) the beacon ran at about 4 W from an 11 V sup
 
 > **Heat and power.** The beacon keys the PA continuously for about 110 s per transmission, much longer than CW or FT8, and the PA has no heatsink. Keep it to short, attended tests: use a low TX %, set Max TX to a few transmissions, and let the PA cool between runs. To cut heat, lower the supply voltage (about 1 W on USB-C against about 5 W on 13.8 V). The WSPR Power setting (5.3) only changes the number sent in the message, and TX Drive (3.3) does not change the beacon's output. Use at your own risk; this firmware is provided as is under the MIT license.
 
-A stand-alone WSPR beacon inside the Pebble HF firmware: no Pico, phone or computer attached. It sends a standard WSPR message (callsign, 4-character grid, power) on one fixed frequency in the 20 m WSPR window.
+A stand-alone WSPR beacon inside the Pebble HF firmware: no Pico, phone or computer attached. It sends a standard WSPR message (callsign, 4-character grid, power) on one fixed frequency in the band's WSPR window (20 m by default; 40 m and the other bands through N4FFF's `BAND_xx` build lines).
 
 ## Building
 
@@ -21,7 +21,7 @@ The switch is on by default, so a plain build of `usdx.ino` is the beacon. Near 
 #define WSPR_BEACON      1   // Stand-alone WSPR beacon ...
 ```
 
-DIAG (the startup self-test) is switched off here to make room; CAT stays off. With `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` commented out and `DIAG` back on, the build is byte-for-byte N4FFF's 1.0.7 test release (checked: identical hex).
+DIAG (the startup self-test) is switched off here to make room; CAT stays off. With `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` commented out and `DIAG` back on, the build is byte-for-byte N4FFF's 1.0.8 (checked: identical hex, 20 m and 40 m).
 
 | Build of 1.0.7 | Flash (of 32,256) | RAM used | RAM left for stack |
 |---|---|---|---|
@@ -70,7 +70,7 @@ Re-sync at the start of each session: WSPR tolerates about ±2 s and the radio's
 
 ## How it works
 
-- Frequency: tone 0 at 14 097 098 Hz; the four tones span 14 097 098–14 097 102.4 Hz, centred in the 14.0970–14.0972 MHz WSPR window (`WSPR_FREQ`).
+- Frequency (`WSPR_FREQ`, follows `BAND_xx`): tone 0 about 2 Hz below the centre of the band's 200 Hz WSPR window, so the four tones (4.4 Hz wide) sit in the middle and the ±90 Hz offset stays inside. 20 m: 14 097 098 Hz (window 14.0970–14.0972 MHz). 40 m: 7 040 098 Hz (7.0400–7.0402). 30 m: 10 140 198; 17 m: 18 106 098; 15 m: 21 096 098; 12 m: 24 926 098; 10 m: 28 126 098. Only 20 m has been on the air.
 - Transmit uses the CW path (constant carrier, key-click shaping). The tones are made by moving the Si5351 PLL in steps of 1/256 Hz (`freq_calc_fine()`, same registers the SSB transmitter uses); the PLL's real resolution is about 0.1 Hz. Computed from the register arithmetic, the tones are within 0.05 Hz of the exact 1.4648 Hz spacing, for every CW Tone setting.
 - Timing: `millis()` runs 1.25× fast on the 20 MHz crystal (the core is built for 16 MHz); all times are converted with `WSPR_U()`. Symbols are 8192/12000 s, timed from the key-down moment.
 - The message is encoded when the beacon is switched on (41 bytes: 21 bytes of data bits in RAM, the sync vector in flash).

@@ -1,15 +1,15 @@
 # Pebble HF firmware: N0ASL fork
 
-An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland/usdx-pebblehf), currently tracking 1.0.7 (N4FFF's v1.0.7-test, a pre-release). It adds a stand-alone WSPR beacon, frequency presets, a TX timeout and menu wrap, each behind its own build switch. 20 m only, tried on a Pebble HF V2.5.
+An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland/usdx-pebblehf), currently tracking 1.0.8 (N4FFF's band-selection code, the version WB2CBA publishes for the 20 m and 40 m boards; not yet a release on N4FFF's GitHub). It adds a stand-alone WSPR beacon, frequency presets, a TX timeout and menu wrap, each behind its own build switch. Hex files for 20 m (tried on a Pebble HF V2.5) and 40 m (built, not yet tried on a radio).
 
-**[Download the ready-to-flash hex](https://github.com/N0ASL/pebblehf-firmware/releases/latest)** (plain hex, no bootloader; flash it the way you would any Pebble HF firmware, and if you use the web updater, choose "Upload my own .hex file")
+**[Download the ready-to-flash hex](https://github.com/N0ASL/pebblehf-firmware/releases/latest)** (pick the file for your board's band, 20 m or 40 m; plain hex, no bootloader; flash it the way you would any Pebble HF firmware, and if you use the web updater, choose "Upload my own .hex file")
 
 [![Pebble HF firmware additions on YouTube](https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg)](https://youtu.be/kMhRi84KVA4)
 [Video walkthrough of the additions](https://youtu.be/kMhRi84KVA4)
 
 ## What's added
 
-- **WSPR beacon:** a stand-alone beacon that runs entirely in the radio, with no computer or GPS needed. Set your call, grid, power, TX % and max TX in the WSPR menu, then sync it by hand by clicking SELECT at the start of an even minute, using any clock you trust, such as a phone. See [docs/wspr-beacon.md](docs/wspr-beacon.md).
+- **WSPR beacon:** a stand-alone beacon that runs entirely in the radio, with no computer or GPS needed. Set your call, grid, power, TX % and max TX in the WSPR menu, then sync it by hand by clicking SELECT at the start of an even minute, using any clock you trust, such as a phone. It transmits on the band's WSPR frequency (14.0971 MHz on 20 m, 7.0401 MHz on 40 m). See [docs/wspr-beacon.md](docs/wspr-beacon.md).
 - **Frequency presets:** 8 slots, Select opens the picker, plus A/B swap with a Tuning Knob double click. See [docs/presets.md](docs/presets.md).
 - **TX Timeout:** menu 3.6, for manual key or PTT.
 - **Menu wrap:** the menu scrolls round.
@@ -21,7 +21,9 @@ An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland
 
 ## Building and options
 
-Everything above is on by default, and the start-up self-test (`DIAG`) is off to make room. Each feature can be switched off in `usdx.ino`; with all of them off and `DIAG` on, the build is identical to N4FFF's 1.0.7 test release. You can also keep `DIAG` and run the WSPR beacon on its own (about 30.7 KB). Sizes, switches and the full change list are in [docs/firmware.md](docs/firmware.md). A tentative operating guide is in [docs/field-guide.md](docs/field-guide.md).
+Everything above is on by default, and the start-up self-test (`DIAG`) is off to make room. Each feature can be switched off in `usdx.ino`; with all of them off and `DIAG` on, the build is identical to N4FFF's 1.0.8. You can also keep `DIAG` and run the WSPR beacon on its own (about 30.7 KB). Sizes, switches and the full change list are in [docs/firmware.md](docs/firmware.md). A tentative operating guide is in [docs/field-guide.md](docs/field-guide.md).
+
+**Other bands.** The band is chosen when the firmware is built, with N4FFF's `BAND_xx` lines near the top of `usdx.ino` (20 m when none is on). The fork's WSPR frequency and preset factory slots follow that choice. Only 20 m and 40 m hex files are released. For a 30, 17, 15, 12 or 10 m board, turn on the matching line (for example `#define BAND_17M 1`) and build: the WSPR frequency is already set for every band, and the presets start empty. Those builds have not been tried on any radio. Always build for the band your board's filters are made for; a build for the wrong band can transmit strong harmonics.
 
 Credits: Pebble HF hardware by Barbaros Asuroglu WB2CBA; firmware by Mike N4FFF (with Becky N4BKY); original uSDX by Guido PE1NNZ. MIT license, see [LICENSE](LICENSE).
 

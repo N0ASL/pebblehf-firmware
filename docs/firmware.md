@@ -1,12 +1,12 @@
 # Fork notes: building the firmware
 
-`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.7, released by N4FFF as v1.0.7-test, a pre-release), unchanged except for this fork's additions, which sit behind build switches. By default this fork's switches are on and `DIAG` is off; commenting out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and restoring `DIAG` gives N4FFF's 1.0.7 build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.7-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up.
+`usdx.ino` in the repo root is N4FFF's Pebble HF firmware (currently 1.0.8: N4FFF's `band-variants` code, see the end of this page), unchanged except for this fork's additions, which sit behind build switches. By default this fork's switches are on and `DIAG` is off; commenting out `WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `TX_TIMEOUT` and `VERSION_TAG` and restoring `DIAG` gives N4FFF's 1.0.8 build. `VERSION_TAG` (`-N0ASL`) is appended to the version in menu 10.1 (`10.1 1.0.8-N0ASL`, with the compile date on line 2) and shown on line 2 at start-up.
 
-## Changes from N4FFF's 1.0.7 test release
+## Changes from N4FFF's 1.0.8
 
-WSPR beacon (`WSPR_BEACON`): stand-alone beacon on 14.097 MHz. Menu 5.0 WSPR Menu opens 5.1 Call, 5.2 Grid, 5.3 Power, 5.4 TX %, 5.5 Offset (-90 to +90 Hz or Random), 5.6 Max TX and 5.7 Beacon. Manual sync with SELECT on an even minute; the display shows only beacon data; any button or PTT stops it; clicking 5.7 arms it and closes the menu (it transmits only after the SELECT sync click); `WSPR done` after the last transmission. See [wspr-beacon.md](wspr-beacon.md).
+WSPR beacon (`WSPR_BEACON`): stand-alone beacon on the band's WSPR frequency (14.0971 MHz on 20 m, 7.0401 MHz on 40 m; `WSPR_FREQ` has a value for every `BAND_xx`). Menu 5.0 WSPR Menu opens 5.1 Call, 5.2 Grid, 5.3 Power, 5.4 TX %, 5.5 Offset (-90 to +90 Hz or Random), 5.6 Max TX and 5.7 Beacon. Manual sync with SELECT on an even minute; the display shows only beacon data; any button or PTT stops it; clicking 5.7 arms it and closes the menu (it transmits only after the SELECT sync click); `WSPR done` after the last transmission. See [wspr-beacon.md](wspr-beacon.md).
 
-Presets (`FREQ_PRESETS`): 8 saved frequencies and modes (LSB, USB, CW, FM or AM), picker opened by SELECT or menu 1.14; double-click of the Tuning Knob swaps VFO A/B; both the swap and a jump to a preset turn RIT off. The picker marks the active VFO with the same small a/b as the main screen. See [presets.md](presets.md).
+Presets (`FREQ_PRESETS`): 8 saved frequencies and modes (LSB, USB, CW, FM or AM), picker opened by SELECT or menu 1.14; double-click of the Tuning Knob swaps VFO A/B; both the swap and a jump to a preset turn RIT off. The factory slots follow the band: 20 m and 40 m have five each, the other bands start empty. The picker marks the active VFO with the same small a/b as the main screen. See [presets.md](presets.md).
 
 TX Timeout (`TX_TIMEOUT`): menu 3.6, Off/1/2/3/5/10 minutes for a straight key or PTT held down. It does not cover VOX transmit, the iambic keyer, CQ messages or the beacon.
 
@@ -18,7 +18,9 @@ EEPROM: presets 0x3D0-0x3EF; WSPR settings 0x3F0-0x3FD and TX timeout 0x3FE. Exi
 
 Status (19 Oct 2026): everything listed above has been tried on a V2.5 20 m radio. The byte-identical build with all switches off is a build comparison, not a radio test.
 
-Size of the default build: 31,702 bytes of flash (98 %), 1,211 bytes RAM, 837 bytes left for the stack.
+Status (25 Nov 2026): the move to 1.0.8 and the per-band WSPR frequency and presets are built and host-tested only. The 20 m build's hex differs from the tried 1.0.7-N0ASL release only in the version text and the initial value of `freq` (from 1.0.8). The 40 m and other band builds have not been on a radio.
+
+Size of the default build: 31,702 bytes of flash (98 %), 1,211 bytes RAM, 837 bytes left for the stack. 40 m: 31,700; 30 m: 31,702; 17, 15 and 12 m: 31,628; 10 m: 31,624 (the bands with empty preset slots come out slightly smaller).
 
 ## Beacon-only build with DIAG on
 
@@ -26,7 +28,15 @@ To keep the start-up self-test (`DIAG`) and try the WSPR beacon on its own, buil
 
 ## Updating from upstream
 
-`git fetch upstream && git merge upstream/main`
+This fork's history is not connected to N4FFF's (it started from a copy), so upstream changes come in commit by commit:
+
+```
+git remote add upstream https://github.com/mspiceland/usdx-pebblehf
+git fetch upstream
+git cherry-pick <commit>
+```
+
+1.0.8 came in this way from commit fbb5895 on N4FFF's `band-variants` branch.
 
 ## Building
 
@@ -64,9 +74,9 @@ Free flash in N4FFF's 1.0.7 build: **≈5.4 KB**. This fork turns DIAG off to ma
 
 Compiler flags: the Arduino AVR core already builds with `-Os`, LTO and section garbage collection. `-mcall-prologues` would save about 560 bytes but slows every function entry and exit, which is risky for the sample-rate-critical receive/transmit code, so it is not used.
 
-With this fork's switches off (`WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `VERSION_TAG`, `TX_TIMEOUT`) and `DIAG` on, the build is byte-identical to N4FFF's 1.0.7 test release.
+With this fork's switches off (`WSPR_BEACON`, `FREQ_PRESETS`, `MENU_WRAP`, `VERSION_TAG`, `TX_TIMEOUT`) and `DIAG` on, the build is byte-identical to N4FFF's 1.0.8 (checked 25 Nov 2026 for both 20 m and 40 m: 26,894 and 26,892 bytes). The sizes in the tables above were measured on 1.0.7; 1.0.8 does not change them for 20 m.
 
-Host tests: `python3 test/wspr_encoder_test.py`, `python3 test/wspr_beacon_sim.py`, `python3 test/menu_nav_test.py` (need a C++ compiler).
+Host tests: `python3 test/wspr_encoder_test.py`, `python3 test/wspr_beacon_sim.py`, `python3 test/preset_test.py`, `python3 test/menu_nav_test.py` (need a C++ compiler).
 
 ### Built-in optional switches (already in the source, off in the Pebble HF build)
 
@@ -84,7 +94,7 @@ Measured as single additions to N4FFF's 1.0.7 build:
 | `VSS_METER` | supply voltage in the S-meter area | +70 | needs 1 MΩ from 12 V to PC3 |
 | `CW_INTERMEDIATE` | decoder shows partial characters | +20 | was on in upstream uSDX |
 
-1.0.8 is N4FFF's `band-variants` branch (not yet merged into `main` or released there). WB2CBA's hardware repo publishes it as two files, `PEBBLEHF_20m.ino` and `PEBBLEHF_40m.ino`, identical except for which band switch is on. Compared with 1.0.7 it adds only compile-time band selection, `BAND_40M` to `BAND_10M` (40, 30, 20, 17, 15, 12 and 10 m), which sets the tuning limits, the power-on frequency and the default sideband.
+1.0.8 is N4FFF's `band-variants` branch (not yet merged into `main` or released there). WB2CBA's hardware repo publishes it as two files, `PEBBLEHF_20m.ino` and `PEBBLEHF_40m.ino`, identical except for which band switch is on. This fork includes it since 25 Nov 2026. Compared with 1.0.7 it adds only compile-time band selection, `BAND_40M` to `BAND_10M` (40, 30, 20, 17, 15, 12 and 10 m), which sets the tuning limits, the power-on frequency and the default sideband.
 
 ## Startup self-test (DIAG)
 

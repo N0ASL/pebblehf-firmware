@@ -1,6 +1,6 @@
 # Frequency presets and A/B swap (`FREQ_PRESETS`)
 
-Eight saved 20 m frequencies (each with its mode), reached with one press of Select, and a quick VFO A/B swap. On by default (switch near the top of `usdx.ino`); about +1,200 bytes of flash over the beacon build, no extra RAM to speak of.
+Eight saved frequencies (each with its mode), reached with one press of Select, and a quick VFO A/B swap. On by default (switch near the top of `usdx.ino`); about +1,200 bytes of flash over the beacon build, no extra RAM to speak of.
 
 Status (19 Oct 2026): **tried on the radio: saving and recalling presets in all five modes (AM and FM included), the picker with the small a/b, the A/B swap, and RIT turning off on a swap and on a preset jump.**
 
@@ -30,7 +30,7 @@ a1 14.0300 CW
 
 The picker never asks for VFO A or B: it works on whichever one is active, and the letter at the start of the bottom line (`a1`, `b6`) shows which; it is the same small a or b the main screen uses. To set both VFOs, do it once, double-click the Tuning Knob, and do it again.
 
-Factory slots (used until you store your own over them): 1 14.030 CW, 2 14.060 CW, 3 14.100 CW, 4 14.250 USB, 5 14.285 USB. Slots 6–8 start empty (`empty`). The CW slots set the CW filter and the 500 Hz tuning step, the USB slots the 1 kHz step, as the Mode menu does.
+Factory slots (used until you store your own over them) on 20 m: 1 14.030 CW, 2 14.060 CW, 3 14.100 CW, 4 14.250 USB, 5 14.285 USB. On 40 m: 1 7.030 CW, 2 7.040 CW, 3 7.074 USB (FT8), 4 7.200 LSB, 5 7.285 LSB. Slots 6–8 start empty (`empty`), and on the other bands all eight do. The CW slots set the CW filter and the 500 Hz tuning step, the USB slots the 1 kHz step, as the Mode menu does.
 
 While the beacon is running any button press stops the beacon first, so the picker opens only with the beacon off. The picker is also not available inside a menu.
 
@@ -42,7 +42,7 @@ If you enable `MODE_BUTTON_CHANGE` (Select cycles the mode), the picker takes th
 
 ## Storage
 
-Slots live in their own EEPROM area (0x3D0–0x3EF, four bytes each: 24-bit frequency, mode in the top byte), outside the parameter list, so no other settings move. A stored value outside 14.000–14.350 MHz, or with a bad mode, reads as the factory value for that slot (empty for 6–8). The beacon is not affected: it uses its own frequency.
+Slots live in their own EEPROM area (0x3D0–0x3EF, four bytes each: 24-bit frequency, mode in the top byte), outside the parameter list, so no other settings move. A stored value outside the band (14.000–14.350 MHz on 20 m, 7.000–7.300 MHz on 40 m), or with a bad mode, reads as the factory value for that slot (empty for 6–8). The beacon is not affected: it uses its own frequency.
 
 ## Tests
 
