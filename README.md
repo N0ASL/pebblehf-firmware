@@ -4,6 +4,8 @@ An unofficial fork of N4FFF's [Pebble HF firmware](https://github.com/mspiceland
 
 **[Download the ready-to-flash hex](https://github.com/N0ASL/pebblehf-firmware/releases/latest)** (pick the file for your board's band, 20 m or 40 m; plain hex, no bootloader; flash it the way you would any Pebble HF firmware, and if you use the web updater, choose "Upload my own .hex file")
 
+The previous release, 1.0.7-N0ASL (20 m only), is still on the [Releases page](https://github.com/N0ASL/pebblehf-firmware/releases).
+
 [![Pebble HF firmware additions on YouTube](https://img.youtube.com/vi/kMhRi84KVA4/mqdefault.jpg)](https://youtu.be/kMhRi84KVA4)
 [Video walkthrough of the additions](https://youtu.be/kMhRi84KVA4)
 
